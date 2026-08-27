@@ -1,0 +1,173 @@
+CREATE DATABASE IF NOT EXISTS tours CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE tours;
+
+CREATE TABLE users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE companias (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    legal_name VARCHAR(180) NOT NULL,
+    trade_name VARCHAR(180) DEFAULT NULL,
+    tax_id VARCHAR(50) DEFAULT NULL UNIQUE,
+    description TEXT DEFAULT NULL,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    phone VARCHAR(40) DEFAULT NULL,
+    website VARCHAR(255) DEFAULT NULL,
+    logo_url VARCHAR(500) DEFAULT NULL,
+    address VARCHAR(255) DEFAULT NULL,
+    city VARCHAR(100) DEFAULT NULL,
+    country VARCHAR(100) DEFAULT NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE tours (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT UNSIGNED NOT NULL,
+    name VARCHAR(180) NOT NULL,
+    description TEXT NOT NULL,
+    destination VARCHAR(120) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    duration VARCHAR(50) NOT NULL,
+    category VARCHAR(80) NOT NULL,
+    max_group_size SMALLINT UNSIGNED DEFAULT NULL,
+    max_altitude_meters SMALLINT UNSIGNED DEFAULT NULL,
+    difficulty VARCHAR(50) DEFAULT NULL,
+    hero_image_url VARCHAR(500) DEFAULT NULL,
+    badge VARCHAR(100) DEFAULT NULL,
+    published_at DATETIME DEFAULT NULL,
+    image_url VARCHAR(500) DEFAULT NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companias(id)
+);
+
+CREATE TABLE tour_quick_details (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    value VARCHAR(180) NOT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    UNIQUE KEY tour_quick_detail_label (tour_id, label),
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_highlights (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    title VARCHAR(180) NOT NULL,
+    description VARCHAR(500) DEFAULT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_prices (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(500) DEFAULT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency CHAR(3) NOT NULL DEFAULT 'USD',
+    min_age TINYINT UNSIGNED DEFAULT NULL,
+    max_age TINYINT UNSIGNED DEFAULT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    UNIQUE KEY tour_price_name (tour_id, name),
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_photos (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    alt_text VARCHAR(255) DEFAULT NULL,
+    is_cover TINYINT(1) NOT NULL DEFAULT 0,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_meeting_points (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    name VARCHAR(180) NOT NULL,
+    description VARCHAR(500) DEFAULT NULL,
+    address VARCHAR(255) DEFAULT NULL,
+    latitude DECIMAL(10,8) DEFAULT NULL,
+    longitude DECIMAL(11,8) DEFAULT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_recommendations (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    title VARCHAR(180) NOT NULL,
+    items TEXT NOT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_inclusions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    included TINYINT(1) NOT NULL DEFAULT 1,
+    item VARCHAR(500) NOT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tour_itinerary_days (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    day_number SMALLINT UNSIGNED NOT NULL,
+    title VARCHAR(180) NOT NULL,
+    location VARCHAR(180) DEFAULT NULL,
+    description TEXT NOT NULL,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
+    UNIQUE KEY tour_itinerary_day (tour_id, day_number)
+);
+
+CREATE TABLE departures (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    departure_date DATE NOT NULL,
+    capacity SMALLINT UNSIGNED NOT NULL DEFAULT 30,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
+    UNIQUE KEY tour_departure_date (tour_id, departure_date)
+);
+
+CREATE TABLE seats (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    departure_id INT UNSIGNED NOT NULL,
+    seat_number SMALLINT UNSIGNED NOT NULL,
+    status ENUM('available', 'occupied') NOT NULL DEFAULT 'available',
+    UNIQUE KEY departure_seat (departure_id, seat_number),
+    FOREIGN KEY (departure_id) REFERENCES departures(id)
+);
+
+CREATE TABLE bookings (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    departure_id INT UNSIGNED NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    status ENUM('confirmed', 'cancelled') NOT NULL DEFAULT 'confirmed',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (departure_id) REFERENCES departures(id)
+);
+
+CREATE TABLE booking_seats (
+    booking_id INT UNSIGNED NOT NULL,
+    seat_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (booking_id, seat_id),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    FOREIGN KEY (seat_id) REFERENCES seats(id)
+);
