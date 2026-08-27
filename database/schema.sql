@@ -22,6 +22,7 @@ CREATE TABLE companias (
     address VARCHAR(255) DEFAULT NULL,
     city VARCHAR(100) DEFAULT NULL,
     country VARCHAR(100) DEFAULT NULL,
+    rating DECIMAL(2,1) NOT NULL DEFAULT 0.0 CHECK (rating BETWEEN 0.0 AND 5.0),
     active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -84,6 +85,7 @@ CREATE TABLE tours (
     badge VARCHAR(100) DEFAULT NULL,
     published_at DATETIME DEFAULT NULL,
     image_url VARCHAR(500) DEFAULT NULL,
+    rating DECIMAL(2,1) NOT NULL DEFAULT 0.0 CHECK (rating BETWEEN 0.0 AND 5.0),
     active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -202,18 +204,31 @@ CREATE TABLE seats (
 CREATE TABLE bookings (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
+    agency_id INT UNSIGNED DEFAULT NULL,
+    tour_id INT UNSIGNED NOT NULL,
     departure_id INT UNSIGNED NOT NULL,
+    vehicle_id INT UNSIGNED NOT NULL,
+    adults SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    children SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    seniors SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    total_people SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     total DECIMAL(10,2) NOT NULL,
     status ENUM('confirmed', 'cancelled') NOT NULL DEFAULT 'confirmed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (agency_id) REFERENCES companias(id) ON DELETE SET NULL,
+    FOREIGN KEY (tour_id) REFERENCES tours(id),
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
     FOREIGN KEY (departure_id) REFERENCES departures(id)
 );
 
 CREATE TABLE booking_seats (
     booking_id INT UNSIGNED NOT NULL,
     seat_id INT UNSIGNED NOT NULL,
+    passenger_type ENUM('adult', 'child', 'senior') NOT NULL,
+    passenger_number SMALLINT UNSIGNED NOT NULL,
     PRIMARY KEY (booking_id, seat_id),
+    UNIQUE KEY booking_passenger (booking_id, passenger_type, passenger_number),
     FOREIGN KEY (booking_id) REFERENCES bookings(id),
     FOREIGN KEY (seat_id) REFERENCES seats(id)
 );

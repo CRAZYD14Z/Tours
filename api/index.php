@@ -88,7 +88,7 @@ try {
 
     if ($resource === 'tours' && $method === 'GET') {
         $destination = trim((string) ($_GET['destination'] ?? ''));
-        $query = $pdo->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.image_url, t.hero_image_url, t.max_group_size, c.trade_name AS company_name FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE (? = \'\' OR t.destination LIKE ?) AND t.active = 1 AND c.active = 1 ORDER BY t.id DESC');
+        $query = $pdo->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.image_url, t.hero_image_url, t.max_group_size, t.rating, c.id AS company_id, c.trade_name AS company_name, c.rating AS company_rating FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE (? = \'\' OR t.destination LIKE ?) AND t.active = 1 AND c.active = 1 ORDER BY t.rating DESC, t.id DESC');
         $query->execute([$destination, "%$destination%"]);
         respond(['data' => $query->fetchAll()]);
     }
@@ -97,10 +97,13 @@ try {
         $tourId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         if (!$tourId) respond(['error' => 'id de tour es obligatorio'], 422);
 
-        $query = $pdo->prepare('SELECT t.*, c.trade_name AS company_name, c.email AS company_email, c.phone AS company_phone, c.website AS company_website FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id = ? AND t.active = 1 AND c.active = 1 LIMIT 1');
+        $query = $pdo->prepare('SELECT t.*, c.trade_name AS company_name, c.rating AS company_rating, c.email AS company_email, c.phone AS company_phone, c.website AS company_website FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id = ? AND t.active = 1 AND c.active = 1 LIMIT 1');
         $query->execute([$tourId]);
         $tour = $query->fetch();
         if (!$tour) respond(['error' => 'Tour no encontrado'], 404);
+
+        $relatedQuery = $pdo->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.image_url, t.hero_image_url, t.rating, c.id AS company_id, c.trade_name AS company_name, c.rating AS company_rating FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id <> ? AND t.active = 1 AND c.active = 1 ORDER BY (t.company_id = ?) DESC, (t.destination = ?) DESC, t.rating DESC, c.rating DESC, t.id DESC LIMIT 12');
+        $relatedQuery->execute([$tourId, $tour['company_id'], $tour['destination']]);
 
         $relatedQueries = [
             'quick_details' => 'SELECT id, label, value, display_order FROM tour_quick_details WHERE tour_id = ? ORDER BY display_order, id',
@@ -129,7 +132,7 @@ try {
         }
         unset($vehicle);
 
-        respond(['data' => ['tour' => $tour, ...$sections]]);
+        respond(['data' => ['tour' => $tour, 'related_tours' => $relatedQuery->fetchAll(), ...$sections]]);
     }
 
     if ($resource === 'departures' && $method === 'GET') {
@@ -178,7 +181,30 @@ try {
         $input = body();
         $departureId = (int) ($input['departure_id'] ?? 0);
         $seatIds = $input['seat_ids'] ?? [];
-        if ($departureId < 1 || !is_array($seatIds) || count($seatIds) < 1) respond(['error' => 'Salida y asientos son obligatorios'], 422);
+        $passengers = $input['passengers'] ?? [];
+        $adults = max(0, (int) ($input['adults'] ?? 0));
+        $children = max(0, (int) ($input['children'] ?? 0));
+        $seniors = max(0, (int) ($input['seniors'] ?? 0));
+        $totalPeople = $adults + $children + $seniors;
+        if ($departureId < 1 || !is_array($seatIds) || count($seatIds) < 1 || !is_array($passengers) || count($passengers) !== count($seatIds) || $totalPeople !== count($seatIds)) {
+            respond(['error' => 'Salida, pasajeros y asientos deben coincidir'], 422);
+        }
+        $passengerTypeCounts = ['adult' => 0, 'child' => 0, 'senior' => 0];
+        foreach ($passengers as $passenger) {
+            $type = $passenger['type'] ?? '';
+            if (!array_key_exists($type, $passengerTypeCounts)) {
+                respond(['error' => 'Tipo de pasajero inválido'], 422);
+            }
+            $passengerTypeCounts[$type]++;
+        }
+        if ($passengerTypeCounts !== ['adult' => $adults, 'child' => $children, 'senior' => $seniors]) {
+            respond(['error' => 'El desglose de pasajeros no coincide'], 422);
+        }
+
+        $departureQuery = $pdo->prepare('SELECT tour_id, vehicle_id FROM departures WHERE id = ? LIMIT 1');
+        $departureQuery->execute([$departureId]);
+        $departure = $departureQuery->fetch();
+        if (!$departure) respond(['error' => 'Salida no encontrada'], 404);
 
         $pdo->beginTransaction();
         $placeholders = implode(',', array_fill(0, count($seatIds), '?'));
@@ -190,13 +216,31 @@ try {
             respond(['error' => 'Uno o más asientos ya no están disponibles'], 409);
         }
 
-        $insert = $pdo->prepare('INSERT INTO bookings (user_id, departure_id, total, status) VALUES (?, ?, ?, \'confirmed\')');
-        $insert->execute([$user['sub'], $departureId, count($seatIds) * 450]);
+        $insert = $pdo->prepare('INSERT INTO bookings (user_id, agency_id, tour_id, departure_id, vehicle_id, adults, children, seniors, total_people, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'confirmed\')');
+        $insert->execute([
+            $user['sub'],
+            isset($input['agency_id']) ? (int) $input['agency_id'] : null,
+            $departure['tour_id'],
+            $departureId,
+            $departure['vehicle_id'],
+            $adults,
+            $children,
+            $seniors,
+            $totalPeople,
+            (float) ($input['total'] ?? count($seatIds) * 450)
+        ]);
         $bookingId = (int) $pdo->lastInsertId();
-        $bookingSeat = $pdo->prepare('INSERT INTO booking_seats (booking_id, seat_id) VALUES (?, ?)');
+        $bookingSeat = $pdo->prepare('INSERT INTO booking_seats (booking_id, seat_id, passenger_type, passenger_number) VALUES (?, ?, ?, ?)');
         $updateSeat = $pdo->prepare("UPDATE seats SET status = 'occupied' WHERE id = ?");
-        foreach (array_map('intval', $seatIds) as $seatId) {
-            $bookingSeat->execute([$bookingId, $seatId]);
+        foreach (array_map('intval', $seatIds) as $index => $seatId) {
+            $passenger = $passengers[$index];
+            $passengerType = (string) ($passenger['type'] ?? '');
+            $passengerNumber = (int) ($passenger['number'] ?? 0);
+            if (!in_array($passengerType, ['adult', 'child', 'senior'], true) || $passengerNumber < 1) {
+                $pdo->rollBack();
+                respond(['error' => 'Información de pasajero inválida'], 422);
+            }
+            $bookingSeat->execute([$bookingId, $seatId, $passengerType, $passengerNumber]);
             $updateSeat->execute([$seatId]);
         }
         $pdo->commit();

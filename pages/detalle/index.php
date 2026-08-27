@@ -86,13 +86,14 @@ $seoStructuredData = $seoTour ? [
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle">TOURS</a>
                     <div class="dropdown-menu">
-                        <a href="#option-a" class="dropdown-link">OpcionA</a>
-                        <a href="#option-b" class="dropdown-link">OpcionB</a>
+                        <a href="#gallery" class="dropdown-link">Galería</a>
+                        <a href="#itinerary" class="dropdown-link">Itinerario</a>
+                        <a href="#vehicle" class="dropdown-link">Transporte</a>
                     </div>
                 </div>
                 
-                <a href="#faq" class="nav-link">FAQ</a>
-                <a href="#contacto" class="nav-link">Contacto</a>
+                <a href="#recommendations" class="nav-link">FAQ</a>
+                <a href="mailto:hola@explorandolosandes.com" class="nav-link">Contacto</a>
 
             </div>
             <div class="nav-toggle">
@@ -107,6 +108,7 @@ $seoStructuredData = $seoTour ? [
         <div class="hero-background"></div>
         <div class="hero-content">
             <div class="hero-badge">Experiencia Exclusiva</div>
+            <div class="hero-rating" id="heroRating" aria-label="Calificación del tour"></div>
             <h1 class="hero-title">Explorando los Andes</h1>
             <p class="hero-subtitle">Un viaje inolvidable a través de las montañas más majestuosas de Sudamérica</p>
         </div>
@@ -586,7 +588,7 @@ $seoStructuredData = $seoTour ? [
                 
                 <div class="tours-carousel">
                     <div class="carousel-container">
-                        <div class="carousel-track">
+                        <div class="carousel-track" id="relatedToursTrack">
                             <div class="carousel-slide">
                                 <div class="tour-card">
                                     <div class="tour-image-container">

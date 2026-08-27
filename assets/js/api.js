@@ -41,10 +41,10 @@ const ToursApi = (() => {
         getSeats(departureId) {
             return request('seats', `&departure_id=${encodeURIComponent(departureId)}`);
         },
-        createBooking(departureId, seatIds) {
+        createBooking(departureId, seatIds, bookingData = {}) {
             return request('bookings', '', {
                 method: 'POST',
-                body: JSON.stringify({ departure_id: departureId, seat_ids: seatIds })
+                body: JSON.stringify({ departure_id: departureId, seat_ids: seatIds, ...bookingData })
             });
         }
     };

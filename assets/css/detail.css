@@ -27,7 +27,7 @@ body {
 .nav-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 1rem 2rem;
+    padding: 0.85rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -43,7 +43,7 @@ body {
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .nav-link {
@@ -53,6 +53,7 @@ body {
     font-weight: 500;
     transition: all 0.3s ease;
     position: relative;
+    padding: 0.35rem 0;
 }
 
 .nav-link::after {
@@ -117,11 +118,13 @@ body {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 8px;
+    border-radius: 4px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
     min-width: 150px;
     display: none; /* Changed from opacity/visibility to display */
     z-index: 1001;
+    padding: 0.35rem 0;
+    overflow: hidden;
 }
 
 .nav-item.dropdown:hover .dropdown-menu {
@@ -164,10 +167,11 @@ body {
     }
 
     .nav-menu.active {
-        height: 100vh;
+        height: calc(100vh - 70px);
         top: 70px;
         opacity: 1;
         visibility: visible;
+        overflow-y: auto;
     }
 
     .nav-toggle {
@@ -1615,7 +1619,36 @@ body {
 }
 
 .tour-rating {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    color: #c28b25;
+    font-size: 0.8rem;
+    letter-spacing: 0;
+}
+
+.tour-rating__stars {
+    letter-spacing: 0.08em;
+}
+
+.tour-rating__value {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.hero-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    color: #f0c35a;
+    font-size: 1rem;
+}
+
+.hero-rating > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .tour-info {

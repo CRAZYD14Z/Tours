@@ -22,7 +22,7 @@ function renderSeatsGrid(layout, seatData) {
     Object.keys(rows).sort((a, b) => Number(a) - Number(b)).forEach(rowNumber => {
         const rowItems = rows[rowNumber]
             .sort((a, b) => Number(a.display_order) - Number(b.display_order))
-            .filter(item => item.position_type === 'seat' && seatsByNumber[Number(item.seat_number)] || item.position_type === 'aisle');
+            .filter(item => (item.position_type === 'seat' && seatsByNumber[Number(item.seat_number)]) || item.position_type === 'aisle');
         const firstAisleIndex = rowItems.findIndex(item => item.position_type === 'aisle');
         const hasSeatsBeforeAisle = rowItems.slice(0, firstAisleIndex).some(item => item.position_type === 'seat');
         const hasSeatsAfterAisle = rowItems.slice(firstAisleIndex + 1).some(item => item.position_type === 'seat');
@@ -121,8 +121,24 @@ async function confirmSelection() {
         return;
     }
 
+    const passengers = [];
+    Object.entries(passengerCounts).forEach(([type, count]) => {
+        const apiType = type === 'seniors' ? 'senior' : type === 'children' ? 'child' : 'adult';
+        for (let number = 1; number <= count; number++) {
+            passengers.push({ type: apiType, number });
+        }
+    });
+
     try {
-        await ToursApi.createBooking(departureId, selectedSeats);
+        await ToursApi.createBooking(departureId, selectedSeats, {
+            agency_id: Number(bookingParams.get('agency_id') || 0) || null,
+            adults: passengerCounts.adults,
+            children: passengerCounts.children,
+            seniors: passengerCounts.seniors,
+            total_people: requiredPassengers,
+            total: Number(bookingParams.get('total') || selectedSeats.length * seatPrice),
+            passengers
+        });
     } catch (error) {
         alert(error.message);
         return;

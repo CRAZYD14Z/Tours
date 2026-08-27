@@ -59,6 +59,14 @@ API_CORS_ORIGIN=*
 
 5. Abre [http://localhost/tours/](http://localhost/tours/).
 
+Para cargar una reserva completa de ejemplo, incluyendo usuario, pasajeros, asientos ocupados y relaciones de booking:
+
+```bash
+/Applications/XAMPP/xamppfiles/bin/mysql -u root tours < database/demo-data.sql
+```
+
+El usuario demo es `demo@viajero.local` y su contraseña es `demo1234`.
+
 La configuracion falla de forma intencional si no existe `.env`. No se deben subir credenciales reales al repositorio.
 
 ## API

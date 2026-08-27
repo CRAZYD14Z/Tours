@@ -211,6 +211,12 @@ class TourCarousel {
         this.addResizeHandler();
     }
 
+    refresh() {
+        this.slides = this.container.querySelectorAll('.carousel-slide');
+        this.currentIndex = 0;
+        this.updateCarousel();
+    }
+
     bindEvents() {
         this.prevBtn.addEventListener('click', () => this.prev());
         this.nextBtn.addEventListener('click', () => this.next());
@@ -314,7 +320,7 @@ class MinimalCarousel {
 
 // Initialize the carousel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new TourCarousel();
+    window.relatedTourCarousel = new TourCarousel();
     new MinimalCarousel();
     new BookingModal();
 });
@@ -506,7 +512,10 @@ class TourCalendar {
                 // Set new selection
                 this.selectedDate = e.currentTarget.dataset.date;
                 const departure = this.departuresByDate[this.selectedDate];
-                if (departure) updateDepartureSummary(departure);
+                if (departure) {
+                    updateDepartureSummary(departure);
+                    if (window.bookingModal) window.bookingModal.updateDisplay();
+                }
                 e.currentTarget.classList.add('selected');
             });
         });
@@ -648,11 +657,59 @@ function updateDepartureSummary(departure) {
     if (availabilityMeter) availabilityMeter.style.width = maxGroupSize ? `${(availableSeats / maxGroupSize) * 100}%` : '0%';
 }
 
+function renderRating(rating) {
+    const value = Math.max(0, Math.min(5, Number(rating) || 0));
+    const rounded = Math.round(value);
+    return `<span class="tour-rating__stars" aria-hidden="true">${'★'.repeat(rounded)}${'☆'.repeat(5 - rounded)}</span><span class="tour-rating__value">${value.toFixed(1)}</span>`;
+}
+
+function friendlyTourUrl(tour) {
+    const slug = value => String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    return `/tours/${slug(tour.company_name)}/${slug(tour.name)}/${encodeURIComponent(tour.id)}/`;
+}
+
+function renderRelatedTours(relatedTours) {
+    const track = document.querySelector('#relatedToursTrack');
+    if (!track) return;
+    track.innerHTML = relatedTours.map(relatedTour => `
+        <div class="carousel-slide">
+            <article class="tour-card">
+                <div class="tour-image-container">
+                    <img src="${escapeDetailHtml(relatedTour.hero_image_url || relatedTour.image_url || '')}" alt="${escapeDetailHtml(relatedTour.name)}" class="tour-image">
+                    <div class="tour-overlay">
+                        <div class="tour-details">
+                            <span class="tour-price">${escapeDetailHtml(relatedTour.price)} ${escapeDetailHtml(relatedTour.currency || 'USD')}</span>
+                            <span class="tour-days">${escapeDetailHtml(relatedTour.duration)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tour-info">
+                    <div class="tour-rating" aria-label="Calificación ${Number(relatedTour.rating || 0).toFixed(1)} de 5">${renderRating(relatedTour.rating)}</div>
+                    <h3 class="tour-name">${escapeDetailHtml(relatedTour.name)}</h3>
+                    <p class="tour-description">${escapeDetailHtml(relatedTour.description)}</p>
+                    <p class="tour-company">${escapeDetailHtml(relatedTour.company_name)} · ${escapeDetailHtml(relatedTour.destination)}</p>
+                    <a class="btn-more-info" href="${friendlyTourUrl(relatedTour)}">ver más</a>
+                </div>
+            </article>
+        </div>
+    `).join('');
+    if (window.relatedTourCarousel) window.relatedTourCarousel.refresh();
+}
+
 function renderTourDetail(payload) {
-    const { tour, quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures, vehicles } = payload;
+    const { tour, related_tours = [], quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures, vehicles } = payload;
     document.title = `${tour.name} - Viajero`;
     document.querySelector('.nav-brand h1').textContent = tour.company_name;
     document.querySelector('.hero-badge').textContent = tour.badge || tour.category;
+    document.querySelector('#heroRating').innerHTML = `
+        <span>Tour ${renderRating(tour.rating)}</span>
+        <span>Operador ${renderRating(tour.company_rating)}</span>
+    `;
     document.querySelector('.hero-title').textContent = tour.name;
     document.querySelector('.hero-subtitle').textContent = `${tour.destination} · ${tour.company_name}`;
     document.querySelector('.hero-background').style.backgroundImage = `url("${tour.hero_image_url || tour.image_url}")`;
@@ -736,6 +793,7 @@ function renderTourDetail(payload) {
     document.querySelector('.price-list').innerHTML = prices.map(price => `
         <div class="price-item"><span class="price-label">${escapeDetailHtml(price.name)}</span><span class="price-value">${escapeDetailHtml(price.amount)} ${escapeDetailHtml(price.currency)}</span></div>
     `).join('');
+    renderRelatedTours(related_tours);
 
     document.querySelector('#vehicleList').innerHTML = vehicles.length ? vehicles.map(vehicle => `
         <article class="vehicle-card">
@@ -834,6 +892,7 @@ class BookingModal {
     }
 
     init() {
+        window.bookingModal = this;
         this.bindEvents();
         this.updateDisplay();
     }
@@ -874,7 +933,8 @@ class BookingModal {
             return;
         }
 
-        this.dateSpan.textContent = new Date(calendarInstance.selectedDate).toLocaleDateString('es-ES', {
+        const [year, month, day] = calendarInstance.selectedDate.split('-').map(Number);
+        this.dateSpan.textContent = new Date(year, month - 1, day).toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -889,18 +949,24 @@ class BookingModal {
         document.body.style.overflow = '';
     }
 
+    getAvailableSeats() {
+        const departure = calendarInstance?.departuresByDate[calendarInstance.selectedDate];
+        return departure ? Number(departure.available_seats || 0) : 0;
+    }
+
     updatePassenger(type, action) {
         const current = this.passengers[type];
         const newValue = action === 'increase' ? current + 1 : Math.max(0, current - 1);
+        const availableSeats = this.getAvailableSeats();
         
         // Check if adding would exceed available slots
-        const totalPeople = Object.values(this.passengers).reduce((sum, count, passengerType) => {
+        const totalPeople = Object.entries(this.passengers).reduce((sum, [passengerType, count]) => {
             const countToAdd = passengerType === type ? newValue : count;
             return sum + countToAdd;
         }, 0);
 
-        if (action === 'increase' && totalPeople > 12) {
-            alert('¡Atención! Has excedido el cupo máximo disponible de 12 personas.');
+        if (action === 'increase' && totalPeople > availableSeats) {
+            alert(`Sólo hay ${availableSeats} cupo${availableSeats === 1 ? '' : 's'} disponible${availableSeats === 1 ? '' : 's'} para esta salida.`);
             return;
         }
         
@@ -931,24 +997,29 @@ class BookingModal {
 
         document.getElementById('totalPrice').textContent = `$${totalPrice.toLocaleString()}`;
 
-        // Update availability
-        const availableSlots = Math.max(0, 12 - totalPeople);
+        const departureCapacity = this.getAvailableSeats();
+        const availableSlots = Math.max(0, departureCapacity - totalPeople);
         document.getElementById('availabilityText').innerHTML = 
             `Disponibilidad: <span class="${availableSlots > 0 ? 'available' : 'unavailable'}">${availableSlots} cupo${availableSlots !== 1 ? 's' : ''} restante${availableSlots !== 1 ? 's' : ''}</span>`;
 
         // Update confirm button state
-        this.confirmBtn.disabled = totalPeople === 0;
-        this.confirmBtn.style.opacity = totalPeople === 0 ? '0.5' : '1';
+        this.confirmBtn.disabled = totalPeople === 0 || totalPeople > departureCapacity;
+        this.confirmBtn.style.opacity = this.confirmBtn.disabled ? '0.5' : '1';
     }
 
     confirm() {
         const totalPeople = Object.values(this.passengers).reduce((sum, count) => sum + count, 0);
+        const departure = calendarInstance?.departuresByDate[calendarInstance.selectedDate];
+        const availableSeats = this.getAvailableSeats();
         if (totalPeople === 0) {
             alert('Por favor selecciona al menos un pasajero');
             return;
         }
+        if (totalPeople > availableSeats) {
+            alert(`Sólo hay ${availableSeats} cupo${availableSeats === 1 ? '' : 's'} disponible${availableSeats === 1 ? '' : 's'} para esta salida.`);
+            return;
+        }
 
-        const departure = calendarInstance.departuresByDate[calendarInstance.selectedDate];
         const tourData = window.currentTourBookingData || {};
         if (!departure || !tourData.tourId) {
             alert('No se pudo preparar la información de la reserva.');
