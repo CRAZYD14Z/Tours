@@ -27,6 +27,35 @@ CREATE TABLE companias (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE vehicles (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT UNSIGNED NOT NULL,
+    brand VARCHAR(80) NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    license_plate VARCHAR(20) NOT NULL UNIQUE,
+    vehicle_year YEAR DEFAULT NULL,
+    color VARCHAR(40) DEFAULT NULL,
+    seat_capacity SMALLINT UNSIGNED NOT NULL,
+    accessible_seats SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    luggage_capacity VARCHAR(100) DEFAULT NULL,
+    status ENUM('available', 'maintenance', 'inactive') NOT NULL DEFAULT 'available',
+    notes VARCHAR(500) DEFAULT NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companias(id) ON DELETE CASCADE
+);
+
+CREATE TABLE vehicle_photos (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id INT UNSIGNED NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    alt_text VARCHAR(255) DEFAULT NULL,
+    is_cover TINYINT(1) NOT NULL DEFAULT 0,
+    display_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+);
+
 CREATE TABLE tours (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     company_id INT UNSIGNED NOT NULL,
@@ -138,9 +167,14 @@ CREATE TABLE tour_itinerary_days (
 CREATE TABLE departures (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tour_id INT UNSIGNED NOT NULL,
+    vehicle_id INT UNSIGNED NOT NULL,
     departure_date DATE NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    currency CHAR(3) NOT NULL DEFAULT 'USD',
+    max_group_size SMALLINT UNSIGNED NOT NULL,
     capacity SMALLINT UNSIGNED NOT NULL DEFAULT 30,
     FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
     UNIQUE KEY tour_departure_date (tour_id, departure_date)
 );
 

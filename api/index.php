@@ -111,7 +111,8 @@ try {
             'recommendations' => 'SELECT id, category, title, items, display_order FROM tour_recommendations WHERE tour_id = ? ORDER BY display_order, id',
             'inclusions' => 'SELECT id, included, item, display_order FROM tour_inclusions WHERE tour_id = ? ORDER BY included DESC, display_order, id',
             'itinerary' => 'SELECT id, day_number, title, location, description FROM tour_itinerary_days WHERE tour_id = ? ORDER BY day_number',
-            'departures' => 'SELECT d.id, d.departure_date, d.capacity, d.capacity - COUNT(CASE WHEN s.status = \'occupied\' THEN 1 END) AS available_seats FROM departures d LEFT JOIN seats s ON s.departure_id = d.id WHERE d.tour_id = ? AND d.departure_date >= CURRENT_DATE GROUP BY d.id, d.departure_date, d.capacity ORDER BY d.departure_date'
+            'departures' => 'SELECT d.id, d.departure_date, d.price, d.currency, d.max_group_size, d.capacity, d.vehicle_id, d.capacity - COUNT(CASE WHEN s.status = \'occupied\' THEN 1 END) AS available_seats FROM departures d LEFT JOIN seats s ON s.departure_id = d.id WHERE d.tour_id = ? AND d.departure_date >= CURRENT_DATE GROUP BY d.id, d.departure_date, d.price, d.currency, d.max_group_size, d.capacity, d.vehicle_id ORDER BY d.departure_date',
+            'vehicles' => 'SELECT DISTINCT v.id, v.brand, v.model, v.license_plate, v.vehicle_year, v.color, v.seat_capacity, v.accessible_seats, v.luggage_capacity, v.status, v.notes FROM departures d INNER JOIN vehicles v ON v.id = d.vehicle_id WHERE d.tour_id = ? AND d.departure_date >= CURRENT_DATE AND v.active = 1 ORDER BY v.brand, v.model, v.id'
         ];
 
         $sections = [];
@@ -121,14 +122,35 @@ try {
             $sections[$section] = $related->fetchAll();
         }
 
+        foreach ($sections['vehicles'] as &$vehicle) {
+            $photos = $pdo->prepare('SELECT id, image_url, alt_text, is_cover, display_order FROM vehicle_photos WHERE vehicle_id = ? ORDER BY is_cover DESC, display_order, id');
+            $photos->execute([$vehicle['id']]);
+            $vehicle['photos'] = $photos->fetchAll();
+        }
+        unset($vehicle);
+
         respond(['data' => ['tour' => $tour, ...$sections]]);
     }
 
     if ($resource === 'departures' && $method === 'GET') {
         $tourId = filter_input(INPUT_GET, 'tour_id', FILTER_VALIDATE_INT);
         if (!$tourId) respond(['error' => 'tour_id es obligatorio'], 422);
-        $query = $pdo->prepare('SELECT d.id, d.tour_id, d.departure_date, d.capacity, d.capacity - COUNT(CASE WHEN s.status = \'occupied\' THEN 1 END) AS available_seats FROM departures d LEFT JOIN seats s ON s.departure_id = d.id WHERE d.tour_id = ? AND d.departure_date >= CURRENT_DATE GROUP BY d.id, d.tour_id, d.departure_date, d.capacity ORDER BY d.departure_date');
+        $query = $pdo->prepare('SELECT d.id, d.tour_id, d.departure_date, d.price, d.currency, d.max_group_size, d.capacity, d.vehicle_id, d.capacity - COUNT(CASE WHEN s.status = \'occupied\' THEN 1 END) AS available_seats FROM departures d LEFT JOIN seats s ON s.departure_id = d.id WHERE d.tour_id = ? AND d.departure_date >= CURRENT_DATE GROUP BY d.id, d.tour_id, d.departure_date, d.price, d.currency, d.max_group_size, d.capacity, d.vehicle_id ORDER BY d.departure_date');
         $query->execute([$tourId]);
+        respond(['data' => $query->fetchAll()]);
+    }
+
+    if ($resource === 'vehicles' && $method === 'GET') {
+        $companyId = filter_input(INPUT_GET, 'company_id', FILTER_VALIDATE_INT);
+        $sql = 'SELECT id, company_id, brand, model, license_plate, vehicle_year, color, seat_capacity, accessible_seats, luggage_capacity, status, notes FROM vehicles WHERE active = 1';
+        $parameters = [];
+        if ($companyId) {
+            $sql .= ' AND company_id = ?';
+            $parameters[] = $companyId;
+        }
+        $sql .= ' ORDER BY brand, model, id';
+        $query = $pdo->prepare($sql);
+        $query->execute($parameters);
         respond(['data' => $query->fetchAll()]);
     }
 

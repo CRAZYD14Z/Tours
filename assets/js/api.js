@@ -34,6 +34,10 @@ const ToursApi = (() => {
         getDepartures(tourId) {
             return request('departures', `&tour_id=${encodeURIComponent(tourId)}`);
         },
+        getVehicles(companyId = '') {
+            const query = companyId ? `&company_id=${encodeURIComponent(companyId)}` : '';
+            return request('vehicles', query);
+        },
         getSeats(departureId) {
             return request('seats', `&departure_id=${encodeURIComponent(departureId)}`);
         },

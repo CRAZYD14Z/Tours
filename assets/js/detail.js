@@ -403,6 +403,7 @@ class TourCalendar {
         this.availableDates = [
             '2026-12-31'
         ];
+        this.departuresByDate = {};
         this.selectedDate = null;
         this.init();
     }
@@ -478,7 +479,9 @@ class TourCalendar {
                 className = 'unavailable';
             }
             
-            html += `<td class="${className}" ${clickHandler}>${day}</td>`;
+            const departure = this.departuresByDate[dateStr];
+            const priceMarkup = departure ? `<small class="calendar-price">${escapeDetailHtml(departure.price)} ${escapeDetailHtml(departure.currency)}</small>` : '';
+            html += `<td class="${className}" ${clickHandler}><span class="calendar-day">${day}</span>${priceMarkup}</td>`;
             
             // Close row after Sunday
             if ((firstDay.getDay() + day) % 7 === 0) {
@@ -502,6 +505,8 @@ class TourCalendar {
                 
                 // Set new selection
                 this.selectedDate = e.target.dataset.date;
+                const departure = this.departuresByDate[this.selectedDate];
+                if (departure) updateDepartureSummary(departure);
                 e.target.classList.add('selected');
             });
         });
@@ -563,8 +568,88 @@ function escapeDetailHtml(value) {
     }[character]));
 }
 
+function initGalleryLightbox() {
+    const lightbox = document.getElementById('galleryLightbox');
+    if (!lightbox || lightbox.dataset.bound === 'true') return;
+
+    const image = lightbox.querySelector('.gallery-lightbox__image');
+    const caption = lightbox.querySelector('.gallery-lightbox__caption');
+    let currentImages = [];
+    let currentIndex = 0;
+
+    const showImage = index => {
+        currentIndex = (index + currentImages.length) % currentImages.length;
+        const selected = currentImages[currentIndex];
+        image.src = selected.src;
+        image.alt = selected.alt;
+        caption.textContent = selected.alt;
+    };
+
+    const open = clickedImage => {
+        const gallery = clickedImage.closest('.gallery-grid, .vehicle-card__gallery');
+        if (!gallery) return;
+
+        currentImages = [...gallery.querySelectorAll('img')].map(galleryImage => ({
+            src: galleryImage.src,
+            alt: galleryImage.alt
+        }));
+        if (!currentImages.length) return;
+
+        showImage(currentImages.findIndex(selected => selected.src === clickedImage.src));
+        lightbox.classList.add('is-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const close = () => {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    };
+
+    document.addEventListener('click', event => {
+        const clickedImage = event.target.closest('.gallery-grid img, .vehicle-card__gallery img');
+        if (clickedImage) open(clickedImage);
+        if (event.target === lightbox || event.target.closest('.gallery-lightbox__close')) close();
+        if (event.target.closest('.gallery-lightbox__prev')) {
+            event.stopPropagation();
+            showImage(currentIndex - 1);
+        }
+        if (event.target.closest('.gallery-lightbox__next')) {
+            event.stopPropagation();
+            showImage(currentIndex + 1);
+        }
+    });
+    document.addEventListener('keydown', event => {
+        if (!lightbox.classList.contains('is-open')) return;
+        if (event.key === 'Escape') close();
+        if (event.key === 'ArrowLeft') showImage(currentIndex - 1);
+        if (event.key === 'ArrowRight') showImage(currentIndex + 1);
+    });
+    lightbox.dataset.bound = 'true';
+}
+
+document.addEventListener('DOMContentLoaded', initGalleryLightbox);
+
+function updateDepartureSummary(departure) {
+    const maxGroupSize = Number(departure.max_group_size || departure.capacity || 0);
+    const availableSeats = Math.min(Number(departure.available_seats || 0), maxGroupSize);
+    const departurePrice = document.getElementById('departurePrice');
+    const availabilityTotal = document.querySelector('.availability-total');
+    const availabilityNote = document.querySelector('.availability-note');
+    const availabilityMeter = document.querySelector('.availability-meter span');
+
+    if (departurePrice) {
+        departurePrice.textContent = `Precio por persona: ${departure.price} ${departure.currency}`;
+    }
+    if (availabilityTotal) availabilityTotal.textContent = `${availableSeats} / ${maxGroupSize}`;
+    if (availabilityNote) availabilityNote.textContent = `plazas disponibles · ${departure.departure_date}`;
+    if (availabilityMeter) availabilityMeter.style.width = maxGroupSize ? `${(availableSeats / maxGroupSize) * 100}%` : '0%';
+}
+
 function renderTourDetail(payload) {
-    const { tour, quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures } = payload;
+    const { tour, quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures, vehicles } = payload;
     document.title = `${tour.name} - Viajero`;
     document.querySelector('.nav-brand h1').textContent = tour.company_name;
     document.querySelector('.hero-badge').textContent = tour.badge || tour.category;
@@ -588,11 +673,12 @@ function renderTourDetail(payload) {
     `).join('');
 
     const firstDeparture = departures[0];
-    const availableSeats = firstDeparture ? Number(firstDeparture.available_seats) : 0;
-    const capacity = firstDeparture ? Number(firstDeparture.capacity) : Number(tour.max_group_size || 0);
-    document.querySelector('.availability-total').textContent = `${availableSeats} / ${capacity}`;
-    document.querySelector('.availability-note').textContent = departures.length ? 'plazas disponibles en la próxima salida' : 'sin salidas disponibles';
-    document.querySelector('.availability-meter span').style.width = capacity ? `${(availableSeats / capacity) * 100}%` : '0%';
+    if (firstDeparture) {
+        updateDepartureSummary(firstDeparture);
+    } else {
+        document.querySelector('.availability-total').textContent = '0 / 0';
+        document.querySelector('.availability-note').textContent = 'sin salidas disponibles';
+    }
 
     document.querySelector('.gallery-grid').innerHTML = photos.map(photo => `
         <figure class="gallery-item${photo.is_cover ? ' gallery-item--large' : ''}">
@@ -651,6 +737,27 @@ function renderTourDetail(payload) {
         <div class="price-item"><span class="price-label">${escapeDetailHtml(price.name)}</span><span class="price-value">${escapeDetailHtml(price.amount)} ${escapeDetailHtml(price.currency)}</span></div>
     `).join('');
 
+    document.querySelector('#vehicleList').innerHTML = vehicles.length ? vehicles.map(vehicle => `
+        <article class="vehicle-card">
+            <div class="vehicle-card__details">
+                <p class="vehicle-card__eyebrow">${escapeDetailHtml(vehicle.status)}</p>
+                <h3>${escapeDetailHtml(vehicle.brand)} ${escapeDetailHtml(vehicle.model)}</h3>
+                <p class="vehicle-card__plate">Placa: ${escapeDetailHtml(vehicle.license_plate)}</p>
+                <dl class="vehicle-specs">
+                    <div><dt>Asientos</dt><dd>${escapeDetailHtml(vehicle.seat_capacity)}</dd></div>
+                    <div><dt>Accesibles</dt><dd>${escapeDetailHtml(vehicle.accessible_seats)}</dd></div>
+                    <div><dt>Equipaje</dt><dd>${escapeDetailHtml(vehicle.luggage_capacity || 'No especificado')}</dd></div>
+                    <div><dt>Año</dt><dd>${escapeDetailHtml(vehicle.vehicle_year || 'No especificado')}</dd></div>
+                </dl>
+                <p>${escapeDetailHtml(vehicle.notes || '')}</p>
+            </div>
+            <div class="vehicle-card__gallery">
+                ${(vehicle.photos || []).map(photo => `<img src="${escapeDetailHtml(photo.image_url)}" alt="${escapeDetailHtml(photo.alt_text || `${vehicle.brand} ${vehicle.model}`)}">`).join('')}
+            </div>
+        </article>
+    `).join('') : '<p>No hay un vehículo asignado para las próximas salidas.</p>';
+    initGalleryLightbox();
+
     const defaultPrice = prices[0] || { amount: tour.price, currency: 'USD' };
     const modalPrices = document.querySelectorAll('.price-detail');
     modalPrices.forEach(priceDetail => {
@@ -661,8 +768,10 @@ function renderTourDetail(payload) {
 
     if (calendarInstance) {
         calendarInstance.availableDates = departures.map(departure => departure.departure_date);
+        calendarInstance.departuresByDate = Object.fromEntries(departures.map(departure => [departure.departure_date, departure]));
         if (departures.length) {
             calendarInstance.currentDate = new Date(`${departures[0].departure_date}T00:00:00`);
+            updateDepartureSummary(firstDeparture);
         }
         calendarInstance.renderCalendar();
     }
