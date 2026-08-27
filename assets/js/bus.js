@@ -1,182 +1,126 @@
-// Estado inicial de los asientos
 const seatPrice = 450;
 let selectedSeats = [];
 let seats = [];
+const bookingParams = new URLSearchParams(window.location.search);
+const passengerCounts = {
+    adults: Math.max(0, Number(bookingParams.get('adults') || 0)),
+    children: Math.max(0, Number(bookingParams.get('children') || 0)),
+    seniors: Math.max(0, Number(bookingParams.get('seniors') || 0))
+};
+const requiredPassengers = Object.values(passengerCounts).reduce((total, count) => total + count, 0);
 
-// Asientos que estarán ocupados por defecto (hardcodeados)
-const initialOccupiedSeats = [5, 8, 17, 33];
-
-// Generar estado inicial de asientos
-function generateSeats() {
+function renderSeatsGrid(layout, seatData) {
     const seatsGrid = document.getElementById('seatsGrid');
-    seatsGrid.innerHTML = ''; // Limpiar asientos existentes antes de regenerar
+    seatsGrid.innerHTML = '';
     seats = [];
-    let currentSeatNumber = 1; // Contador para la numeración continua de asientos
+    const seatsByNumber = Object.fromEntries(seatData.map(seat => [Number(seat.seat_number), seat]));
+    const rows = layout.reduce((groups, item) => {
+        (groups[item.row_number] ||= []).push(item);
+        return groups;
+    }, {});
 
-    // Generar asientos con el nuevo layout, ahora incluyendo una fila extra al final (0-8 para 9 filas)
-    for (let row = 0; row < 9; row++) { // Cambiado de < 8 a < 9 para la fila extra
-        // Fila 3 (índice 2): solo asientos laterales
-        if (row === 2) {
-            // Lado izquierdo - asiento exterior
-            const seat = createSeat(currentSeatNumber);
-            seatsGrid.appendChild(seat);
-            seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-            currentSeatNumber++;
+    Object.keys(rows).sort((a, b) => Number(a) - Number(b)).forEach(rowNumber => {
+        const rowItems = rows[rowNumber]
+            .sort((a, b) => Number(a.display_order) - Number(b.display_order))
+            .filter(item => item.position_type === 'seat' && seatsByNumber[Number(item.seat_number)] || item.position_type === 'aisle');
+        const firstAisleIndex = rowItems.findIndex(item => item.position_type === 'aisle');
+        const hasSeatsBeforeAisle = rowItems.slice(0, firstAisleIndex).some(item => item.position_type === 'seat');
+        const hasSeatsAfterAisle = rowItems.slice(firstAisleIndex + 1).some(item => item.position_type === 'seat');
+        const visibleItems = rowItems.filter(item => item.position_type === 'seat' || (item.position_type === 'aisle' && hasSeatsBeforeAisle && hasSeatsAfterAisle));
+        if (!visibleItems.length) return;
 
-            // Espacio vacío para asiento interior
-            const emptyLeft = document.createElement('div');
-            emptyLeft.className = 'seat empty-seat';
-            seatsGrid.appendChild(emptyLeft);
+        const row = document.createElement('div');
+        row.className = 'seat-row';
+        row.style.gridTemplateColumns = `repeat(${visibleItems.length}, 1fr)`;
 
-            // Divisor de pasillo
-            const aisle = document.createElement('div');
-            aisle.className = 'aisle-divider';
-            seatsGrid.appendChild(aisle);
-
-            // Lado derecho - espacio vacío para asiento interior
-            const emptyRight = document.createElement('div');
-            emptyRight.className = 'seat empty-seat';
-            seatsGrid.appendChild(emptyRight);
-
-            // Lado derecho - asiento exterior
-            const seatRight = createSeat(currentSeatNumber);
-            seatsGrid.appendChild(seatRight);
-            seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-            currentSeatNumber++;
-            continue;
-        }
-
-        // Fila 4 (índice 3): solo asientos al lado del pasillo
-        else if (row === 3) { // Usar else if para que solo una condición se cumpla por fila
-            // Lado izquierdo - espacio vacío para asiento exterior
-            const emptyLeftOuter = document.createElement('div');
-            emptyLeftOuter.className = 'seat empty-seat';
-            seatsGrid.appendChild(emptyLeftOuter);
-
-            // Lado izquierdo - asiento interior
-            const seatLeft = createSeat(currentSeatNumber);
-            seatsGrid.appendChild(seatLeft);
-            seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-            currentSeatNumber++;
-
-            // Divisor de pasillo
-            const aisle = document.createElement('div');
-            aisle.className = 'aisle-divider';
-            seatsGrid.appendChild(aisle);
-
-            // Lado derecho - asiento interior
-            const seatRight = createSeat(currentSeatNumber);
-            seatsGrid.appendChild(seatRight);
-            seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-            currentSeatNumber++;
-
-            // Lado derecho - espacio vacío para asiento exterior
-            const emptyRightOuter = document.createElement('div');
-            emptyRightOuter.className = 'seat empty-seat';
-            seatsGrid.appendChild(emptyRightOuter);
-            continue;
-        }
-        // Nueva última fila (índice 8): 5 asientos
-        else if (row === 8) {
-            for (let col = 1; col <= 5; col++) { // 5 asientos para la última fila
-                const seat = createSeat(currentSeatNumber);
-                seatsGrid.appendChild(seat);
-                seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-                currentSeatNumber++;
-            }
-        }
-        // Filas regulares: 2 asientos por cada lado del pasillo
-        else { // Esto ahora cubre las filas 0, 1, 4, 5, 6, 7
-            // Columnas 1-2 (lado izquierdo)
-            for (let col = 1; col <= 2; col++) {
-                const seat = createSeat(currentSeatNumber);
-                seatsGrid.appendChild(seat);
-                seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-                currentSeatNumber++;
+        visibleItems.forEach(item => {
+            if (item.position_type === 'aisle') {
+                const aisle = document.createElement('div');
+                aisle.className = 'aisle-divider';
+                row.appendChild(aisle);
+                return;
             }
 
-            // Divisor de pasillo
-            const aisle = document.createElement('div');
-            aisle.className = 'aisle-divider';
-            seatsGrid.appendChild(aisle);
-
-            // Columnas 3-4 (lado derecho)
-            for (let col = 3; col <= 4; col++) {
-                const seat = createSeat(currentSeatNumber);
-                seatsGrid.appendChild(seat);
-                seats.push({ id: currentSeatNumber, status: getInitialSeatStatus(currentSeatNumber) });
-                currentSeatNumber++;
-            }
-        }
-    }
+            const seatDataItem = seatsByNumber[Number(item.seat_number)];
+            if (!seatDataItem) return;
+            const seat = createSeat(seatDataItem);
+            row.appendChild(seat.element);
+            seats.push(seat.state);
+        });
+        seatsGrid.appendChild(row);
+    });
 }
 
-function createSeat(seatNumber) {
+function createSeat(seatData) {
+    const seatNumber = Number(seatData.seat_number);
     const seat = document.createElement('div');
-    seat.className = 'seat';
-    seat.dataset.seatNumber = seatNumber; // Almacena el número de asiento
-    
-    // Obtiene el estado inicial basado en si está en la lista de ocupados
-    const status = getInitialSeatStatus(seatNumber);
-    seat.classList.add(status);
-    seat.textContent = seatNumber; // Muestra el número de asiento
-    
-    seat.addEventListener('click', () => toggleSeat(seatNumber));
-    
-    return seat;
+    const status = seatData.status === 'occupied' ? 'occupied' : 'available';
+    seat.className = `seat ${status}`;
+    seat.dataset.seatNumber = seatNumber;
+    seat.dataset.seatId = seatData.id;
+    seat.textContent = seatNumber;
+    seat.addEventListener('click', () => toggleSeat(Number(seatData.id)));
+    return {
+        element: seat,
+        state: { id: Number(seatData.id), number: seatNumber, status }
+    };
 }
 
-// Determina el estado inicial de un asiento
-function getInitialSeatStatus(seatNumber) {
-    return initialOccupiedSeats.includes(seatNumber) ? 'occupied' : 'available';
-}
-
-// Alternar selección de asiento
 function toggleSeat(seatId) {
-    const seat = seats.find(s => s.id === seatId);
-    
-    if (seat.status === 'occupied') return;
-    
-    const seatElement = document.querySelector(`[data-seat-number="${seatId}"]`);
-    
+    const seat = seats.find(item => item.id === seatId);
+    if (!seat || seat.status === 'occupied') return;
+    if (!selectedSeats.includes(seatId) && requiredPassengers > 0 && selectedSeats.length >= requiredPassengers) {
+        alert(`Solo puedes seleccionar ${requiredPassengers} asientos.`);
+        return;
+    }
+
+    const seatElement = document.querySelector(`[data-seat-id="${seatId}"]`);
     if (selectedSeats.includes(seatId)) {
-        // Deseleccionar
         selectedSeats = selectedSeats.filter(id => id !== seatId);
         seatElement.classList.remove('selected');
         seatElement.classList.add('available');
     } else {
-        // Seleccionar
         selectedSeats.push(seatId);
         seatElement.classList.remove('available');
         seatElement.classList.add('selected');
     }
-    
     updateSelectionInfo();
 }
 
-// Actualizar información de selección
 function updateSelectionInfo() {
     const selectedSeatsElement = document.getElementById('selectedSeats');
     const totalPriceElement = document.getElementById('totalPrice');
     const confirmBtn = document.getElementById('confirmBtn');
-    
+
     if (selectedSeats.length === 0) {
         selectedSeatsElement.textContent = 'Ningún asiento seleccionado';
     } else {
         const seatText = selectedSeats.length === 1 ? 'asiento' : 'asientos';
-        selectedSeats.sort((a, b) => a - b); // Ordenar asientos numéricamente
-        selectedSeatsElement.textContent = `${selectedSeats.length} ${seatText} seleccionados: ${selectedSeats.join(', ')}`;
+        const selectedNumbers = selectedSeats
+            .map(seatId => seats.find(seat => seat.id === seatId)?.number || seatId)
+            .sort((a, b) => a - b);
+        selectedSeatsElement.textContent = `${selectedSeats.length} ${seatText} seleccionados: ${selectedNumbers.join(', ')}`;
     }
-    
-    const totalPrice = selectedSeats.length * seatPrice;
-    totalPriceElement.textContent = totalPrice.toLocaleString();
-    
-    confirmBtn.disabled = selectedSeats.length === 0;
+
+    totalPriceElement.textContent = (selectedSeats.length * seatPrice).toLocaleString();
+    confirmBtn.disabled = selectedSeats.length === 0
+        || (requiredPassengers > 0 && selectedSeats.length !== requiredPassengers);
+    confirmBtn.title = requiredPassengers > 0 && selectedSeats.length !== requiredPassengers
+        ? `Selecciona exactamente ${requiredPassengers} asientos`
+        : '';
 }
 
-// Confirmar selección
 async function confirmSelection() {
-    const departureId = new URLSearchParams(window.location.search).get('departure_id') || '1';
+    const departureId = bookingParams.get('departure_id');
+    if (!departureId) {
+        alert('Falta la salida seleccionada. Regresa al detalle del tour.');
+        return;
+    }
+    if (requiredPassengers > 0 && selectedSeats.length !== requiredPassengers) {
+        alert(`Debes seleccionar exactamente ${requiredPassengers} asientos.`);
+        return;
+    }
+
     try {
         await ToursApi.createBooking(departureId, selectedSeats);
     } catch (error) {
@@ -184,79 +128,60 @@ async function confirmSelection() {
         return;
     }
 
-    const modal = document.getElementById('successModal');
-    modal.style.display = 'block';
-    
-    // Marcar asientos como ocupados
     selectedSeats.forEach(seatId => {
-        const seat = seats.find(s => s.id === seatId);
+        const seat = seats.find(item => item.id === seatId);
+        const seatElement = document.querySelector(`[data-seat-id="${seatId}"]`);
         seat.status = 'occupied';
-        
-        const seatElement = document.querySelector(`[data-seat-number="${seatId}"]`);
         seatElement.classList.remove('selected');
         seatElement.classList.add('occupied');
     });
-    
     selectedSeats = [];
     updateSelectionInfo();
+    document.getElementById('successModal').style.display = 'block';
 }
 
-// Cerrar modal
 function closeModal() {
-    const modal = document.getElementById('successModal');
-    modal.style.display = 'none';
+    document.getElementById('successModal').style.display = 'none';
 }
 
-// Efecto ripple en botones
 function createRipple(event) {
     const button = event.currentTarget;
     const ripple = button.querySelector('.ripple');
-    
     const diameter = Math.max(button.clientWidth, button.clientHeight);
     const radius = diameter / 2;
-    
-    ripple.style.width = ripple.style.height = `${diameter}px`;
+    ripple.style.width = `${diameter}px`;
+    ripple.style.height = `${diameter}px`;
     ripple.style.left = `${event.clientX - button.offsetLeft - radius}px`;
     ripple.style.top = `${event.clientY - button.offsetTop - radius}px`;
-    
     ripple.classList.add('ripple');
-    
-    setTimeout(() => {
-        ripple.classList.remove('ripple');
-    }, 600);
+    setTimeout(() => ripple.classList.remove('ripple'), 600);
 }
 
-// Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
-    generateSeats();
+    const agencyName = document.getElementById('agencyName');
+    const bookingRoute = document.getElementById('bookingRoute');
+    const bookingSummary = document.getElementById('bookingSummary');
+    if (agencyName && bookingParams.get('agency_name')) agencyName.textContent = bookingParams.get('agency_name');
+    if (bookingRoute && bookingParams.get('tour_name')) bookingRoute.textContent = bookingParams.get('tour_name');
+    if (bookingSummary && bookingParams.get('departure_date')) {
+        bookingSummary.textContent = `Salida: ${bookingParams.get('departure_date')} · Pasajeros: ${requiredPassengers}`;
+    }
 
-    const departureId = new URLSearchParams(window.location.search).get('departure_id');
-    if (departureId) {
-        ToursApi.getSeats(departureId).then(({ data }) => {
-            data.forEach(({ seat_number: seatNumber, status }) => {
-                const seat = seats.find(item => item.id === Number(seatNumber));
-                const seatElement = document.querySelector(`[data-seat-number="${seatNumber}"]`);
-                if (seat && seatElement && status === 'occupied') {
-                    seat.status = 'occupied';
-                    seatElement.classList.remove('available');
-                    seatElement.classList.add('occupied');
-                }
-            });
+    const departureId = bookingParams.get('departure_id');
+    if (!departureId) {
+        alert('Falta la salida seleccionada. Regresa al detalle del tour.');
+    } else {
+        ToursApi.getSeats(departureId).then(({ data, layout }) => {
+            renderSeatsGrid(layout || [], data || []);
+            updateSelectionInfo();
         }).catch(error => alert(error.message));
     }
-    
+
     const confirmBtn = document.getElementById('confirmBtn');
-    const closeBtn = document.getElementById('closeModal');
-    
     confirmBtn.addEventListener('click', confirmSelection);
     confirmBtn.addEventListener('click', createRipple);
-    closeBtn.addEventListener('click', closeModal);
-    
-    // Cerrar modal al hacer clic fuera
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('successModal');
-        if (e.target === modal) {
-            closeModal();
-        }
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    window.addEventListener('click', event => {
+        if (event.target === document.getElementById('successModal')) closeModal();
     });
 });

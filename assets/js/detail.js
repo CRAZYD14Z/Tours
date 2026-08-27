@@ -426,9 +426,9 @@ class TourCalendar {
         
         const calendarHTML = `
             <div class="calendar-header">
-                <button class="calendar-nav" id="prevMonth">‹</button>
+                <button type="button" class="calendar-nav" id="prevMonth">‹</button>
                 <h3 class="calendar-month">${monthNames[month]} ${year}</h3>
-                <button class="calendar-nav" id="nextMonth">›</button>
+                <button type="button" class="calendar-nav" id="nextMonth">›</button>
             </div>
             <table class="calendar">
                 <thead>
@@ -504,10 +504,10 @@ class TourCalendar {
                 }
                 
                 // Set new selection
-                this.selectedDate = e.target.dataset.date;
+                this.selectedDate = e.currentTarget.dataset.date;
                 const departure = this.departuresByDate[this.selectedDate];
                 if (departure) updateDepartureSummary(departure);
-                e.target.classList.add('selected');
+                e.currentTarget.classList.add('selected');
             });
         });
     }
@@ -764,6 +764,16 @@ function renderTourDetail(payload) {
         priceDetail.textContent = `${defaultPrice.amount} ${defaultPrice.currency} c/u`;
     });
     window.currentTourPrices = prices;
+    window.currentTourBookingData = {
+        agencyId: tour.company_id,
+        agencyName: tour.company_name,
+        tourId: tour.id,
+        tourName: tour.name,
+        departure: firstDeparture,
+        vehicleId: firstDeparture?.vehicle_id || '',
+        price: defaultPrice.amount,
+        currency: defaultPrice.currency
+    };
     bindItineraryInteractions();
 
     if (calendarInstance) {
@@ -938,16 +948,28 @@ class BookingModal {
             return;
         }
 
-        const bookingDetails = {
-            date: calendarInstance.selectedDate,
-            passengers: { ...this.passengers },
-            total: Object.keys(this.passengers).reduce((sum, type) => {
-                return sum + (this.passengers[type] * this.prices[type]);
-            }, 0)
-        };
+        const departure = calendarInstance.departuresByDate[calendarInstance.selectedDate];
+        const tourData = window.currentTourBookingData || {};
+        if (!departure || !tourData.tourId) {
+            alert('No se pudo preparar la información de la reserva.');
+            return;
+        }
 
-        alert(`¡Reserva confirmada!\n\nFecha: ${new Date(bookingDetails.date).toLocaleDateString('es-ES')}\nAdultos: ${bookingDetails.passengers.adults}\nNiños: ${bookingDetails.passengers.children}\nTercera Edad: ${bookingDetails.passengers.seniors}\n\nTotal: $${bookingDetails.total.toLocaleString()}\n\nTe contactaremos pronto con los detalles de tu reserva.`);
-        
-        this.close();
+        const bookingData = {
+            agency_id: tourData.agencyId || '',
+            agency_name: tourData.agencyName || '',
+            tour_id: tourData.tourId,
+            tour_name: tourData.tourName || '',
+            departure_id: departure.id,
+            departure_date: departure.departure_date,
+            vehicle_id: departure.vehicle_id || '',
+            adults: this.passengers.adults,
+            children: this.passengers.children,
+            seniors: this.passengers.seniors,
+            total_people: totalPeople,
+            total: Object.keys(this.passengers).reduce((sum, type) => sum + (this.passengers[type] * this.prices[type]), 0)
+        };
+        const query = new URLSearchParams(bookingData);
+        window.location.href = `../../bus/index.php?${query.toString()}`;
     }
 }

@@ -563,7 +563,7 @@ $seoStructuredData = $seoTour ? [
                     </div>
                 </div>
                 
-                <button class="minimal-btn" id="confirmBooking" onclick="window.location.href='../bus/index.php'">CONFIRMAR RESERVA</button>
+                <button class="minimal-btn" id="confirmBooking">CONFIRMAR RESERVA</button>
             </div>
         </div>
     </div>

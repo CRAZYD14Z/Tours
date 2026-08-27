@@ -154,17 +154,27 @@ try {
         respond(['data' => $query->fetchAll()]);
     }
 
-    authenticated();
-
     if ($resource === 'seats' && $method === 'GET') {
         $departureId = filter_input(INPUT_GET, 'departure_id', FILTER_VALIDATE_INT);
         if (!$departureId) respond(['error' => 'departure_id es obligatorio'], 422);
+        $departureQuery = $pdo->prepare('SELECT vehicle_id FROM departures WHERE id = ? LIMIT 1');
+        $departureQuery->execute([$departureId]);
+        $departure = $departureQuery->fetch();
+        if (!$departure) respond(['error' => 'Salida no encontrada'], 404);
+
         $query = $pdo->prepare('SELECT id, seat_number, status FROM seats WHERE departure_id = ? ORDER BY seat_number');
         $query->execute([$departureId]);
-        respond(['data' => $query->fetchAll()]);
+        $layoutQuery = $pdo->prepare('SELECT row_number, position_type, seat_number, display_order FROM vehicle_seat_layout WHERE vehicle_id = ? ORDER BY row_number, display_order');
+        $layoutQuery->execute([$departure['vehicle_id']]);
+        respond([
+            'data' => $query->fetchAll(),
+            'layout' => $layoutQuery->fetchAll(),
+            'vehicle_id' => (int) $departure['vehicle_id']
+        ]);
     }
 
     if ($resource === 'bookings' && $method === 'POST') {
+        $user = authenticated();
         $input = body();
         $departureId = (int) ($input['departure_id'] ?? 0);
         $seatIds = $input['seat_ids'] ?? [];
@@ -181,7 +191,7 @@ try {
         }
 
         $insert = $pdo->prepare('INSERT INTO bookings (user_id, departure_id, total, status) VALUES (?, ?, ?, \'confirmed\')');
-        $insert->execute([authenticated()['sub'], $departureId, count($seatIds) * 450]);
+        $insert->execute([$user['sub'], $departureId, count($seatIds) * 450]);
         $bookingId = (int) $pdo->lastInsertId();
         $bookingSeat = $pdo->prepare('INSERT INTO booking_seats (booking_id, seat_id) VALUES (?, ?)');
         $updateSeat = $pdo->prepare("UPDATE seats SET status = 'occupied' WHERE id = ?");

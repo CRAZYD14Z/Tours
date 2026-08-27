@@ -5,15 +5,15 @@
     <title>Selección de Asientos - Bus Express</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/theme.css">
-    <link rel="stylesheet" href="../../assets/css/bus.css">
+    <link rel="stylesheet" href="/tours/assets/css/theme.css">
+    <link rel="stylesheet" href="/tours/assets/css/bus.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>Bus Express</h1>
-            <p class="route">Ciudad de México → Guadalajara</p>
-            <p class="time">Salida: 14:30 | Llegada estimada: 22:15</p>
+            <h1 id="agencyName">Bus Express</h1>
+            <p class="route" id="bookingRoute">Ciudad de México → Guadalajara</p>
+            <p class="time" id="bookingSummary">Selecciona tus asientos</p>
         </header>
 
         <div class="bus-container">
@@ -78,7 +78,7 @@
 
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../assets/js/api.js"></script>
-    <script src="../../assets/js/bus.js"></script>
+    <script src="/tours/assets/js/api.js"></script>
+    <script src="/tours/assets/js/bus.js?v=2"></script>
 </body>
 </html>

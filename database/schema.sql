@@ -56,6 +56,18 @@ CREATE TABLE vehicle_photos (
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
 );
 
+CREATE TABLE vehicle_seat_layout (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id INT UNSIGNED NOT NULL,
+    row_number SMALLINT UNSIGNED NOT NULL,
+    position_type ENUM('seat', 'aisle') NOT NULL,
+    seat_number SMALLINT UNSIGNED DEFAULT NULL,
+    display_order SMALLINT UNSIGNED NOT NULL,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
+    UNIQUE KEY vehicle_layout_position (vehicle_id, row_number, display_order),
+    UNIQUE KEY vehicle_layout_seat (vehicle_id, seat_number)
+);
+
 CREATE TABLE tours (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     company_id INT UNSIGNED NOT NULL,
