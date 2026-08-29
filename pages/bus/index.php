@@ -6,12 +6,37 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/tours/assets/css/theme.css">
+    <link rel="stylesheet" href="/tours/assets/css/styles.css">
     <link rel="stylesheet" href="/tours/assets/css/bus.css">
 </head>
 <body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__brand">
+                <a href="/tours/" style="text-decoration: none; color: inherit;">
+                    <h1 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                        <span>✨</span>
+                        <span>Weekender</span>
+                    </h1>
+                </a>
+            </div>
+
+            <button class="nav__toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav__menu">
+                <a href="/tours/" class="btn btn--ghost">Explorar Tours</a>
+                <button class="btn btn--primary" style="background: var(--primary); color: #fff; border-radius: 999px;">Iniciar sesión</button>
+            </div>
+        </nav>
+    </header>
+
     <div class="container">
-        <header class="header">
-            <h1 id="agencyName">Bus Express</h1>
+        <header class="bus-page-header">
+            <h2 id="agencyName">Bus Express</h2>
             <p class="route" id="bookingRoute">Ciudad de México → Guadalajara</p>
             <p class="time" id="bookingSummary">Selecciona tus asientos</p>
         </header>

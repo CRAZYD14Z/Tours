@@ -84,13 +84,14 @@ $seoStructuredData = $seoTour ? [
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/tours/assets/css/theme.css">
+    <link rel="stylesheet" href="/tours/assets/css/styles.css">
     <link rel="stylesheet" href="/tours/assets/css/detail.css">
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__brand">
                 <a href="/tours/" style="text-decoration: none; color: inherit;">
                     <h1 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
                         <span>✨</span>
@@ -98,30 +99,22 @@ $seoStructuredData = $seoTour ? [
                     </h1>
                 </a>
             </div>
-            <div class="nav-menu">
-                <a href="/tours/" class="nav-link">Inicio</a>
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle">TOURS</a>
-                    <div class="dropdown-menu">
-                        <a href="#gallery" class="dropdown-link">Galería</a>
-                        <a href="#itinerary" class="dropdown-link">Itinerario</a>
-                        <a href="#vehicle" class="dropdown-link">Transporte</a>
-                        <a href="#operator" class="dropdown-link">Operador</a>
-                        <a href="#reviews" class="dropdown-link">Reseñas</a>
-                    </div>
-                </div>
-                <a href="#operator" class="nav-link">Operador</a>
-                <a href="#reviews" class="nav-link">Reseñas</a>
-                <a href="#recommendations" class="nav-link">FAQ</a>
-                <a href="<?= htmlspecialchars($companyUrl, ENT_QUOTES, 'UTF-8') ?>" class="nav-link" style="color: var(--accent); font-weight: 600;">Ver Compañía</a>
+
+            <button class="nav__toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav__menu">
+                <a href="/tours/" class="btn btn--ghost">Inicio</a>
+                <a href="#operator" class="btn btn--ghost">Operador</a>
+                <a href="#reviews" class="btn btn--ghost">Reseñas</a>
+                <a href="#recommendations" class="btn btn--ghost">FAQ</a>
+                <button class="btn btn--primary" style="background: var(--primary); color: #fff; border-radius: 999px;">Iniciar sesión</button>
             </div>
-            <div class="nav-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
     <div class="hero-section">
         <div class="hero-background"></div>
@@ -984,6 +977,7 @@ $seoStructuredData = $seoTour ? [
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/tours/assets/js/api.js"></script>
+    <script src="/tours/assets/js/main.js"></script>
     <script src="/tours/assets/js/detail.js"></script>
 </body>
 
