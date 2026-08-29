@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/config.php';
@@ -11,9 +12,9 @@ function seoSlug(string $value): string
     return trim($value, '-');
 }
 
-$companyId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) 
-    ?? filter_input(INPUT_GET, 'Id', FILTER_VALIDATE_INT) 
-    ?? filter_input(INPUT_GET, 'company_id', FILTER_VALIDATE_INT) 
+$companyId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT)
+    ?? filter_input(INPUT_GET, 'Id', FILTER_VALIDATE_INT)
+    ?? filter_input(INPUT_GET, 'company_id', FILTER_VALIDATE_INT)
     ?? 1;
 
 $company = null;
@@ -25,7 +26,7 @@ $categories = [];
 
 try {
     $pdo = database();
-    
+
     // Consultar información de la compañía
     $stmt = $pdo->prepare('SELECT * FROM companias WHERE id = ? AND active = 1 LIMIT 1');
     $stmt->execute([$companyId]);
@@ -111,6 +112,7 @@ $seoStructuredData = [
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -132,7 +134,9 @@ $seoStructuredData = [
     <meta name="twitter:image" content="<?= htmlspecialchars($seoImage, ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Schema.org JSON-LD -->
-    <script type="application/ld+json"><?= json_encode($seoStructuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
+    <script type="application/ld+json">
+        <?= json_encode($seoStructuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+    </script>
 
     <!-- Google Fonts & Stylesheets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,26 +147,30 @@ $seoStructuredData = [
     <link rel="stylesheet" href="/tours/assets/css/detail.css">
     <link rel="stylesheet" href="/tours/assets/css/company.css">
 </head>
+
 <body>
+
+
 
     <!-- Header & Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <a href="/tours/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
-                    <span style="font-size: 1.3rem;">✨</span>
-                    <h1 style="margin: 0;"><?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') ?></h1>
+                <a href="/tours/" style="text-decoration: none; color: inherit;">
+                    <h1 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                        <span>✨</span>
+                        <span>Weekender</span>
+                    </h1>
                 </a>
             </div>
             <div class="nav-menu">
-                <a href="/tours/" class="nav-link">Inicio</a>
-                <a href="#about" class="nav-link">Compañía</a>
                 <a href="#tours" class="nav-link">Mejores Tours</a>
                 <?php if (!empty($vehicles)): ?>
                     <a href="#fleet" class="nav-link">Flota</a>
                 <?php endif; ?>
                 <a href="#reviews" class="nav-link">Reseñas</a>
                 <a href="#contact" class="nav-link">Contacto</a>
+                <button class="btn btn--primary" style="background: var(--primary); color: #fff; border-radius: 999px;">Iniciar sesión</button>
             </div>
             <div class="nav-toggle">
                 <span></span>
@@ -195,7 +203,7 @@ $seoStructuredData = [
                     </div>
 
                     <h1 class="company-hero__title"><?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') ?></h1>
-                    
+
                     <?php if (!empty($company['legal_name']) && $company['legal_name'] !== $companyName): ?>
                         <p class="company-hero__legal"><?= htmlspecialchars($company['legal_name'], ENT_QUOTES, 'UTF-8') ?> &bull; Razón Social</p>
                     <?php endif; ?>
@@ -232,17 +240,16 @@ $seoStructuredData = [
             <form class="company-search-form" id="companySearchForm">
                 <div class="search-field">
                     <label for="companySearchDestination">Destino o Nombre</label>
-                    <input 
-                        type="text" 
-                        id="companySearchDestination" 
+                    <input
+                        type="text"
+                        id="companySearchDestination"
                         placeholder="Ej. Machu Picchu, Valle Sagrado..."
                         list="companyDestinationsList"
-                        autocomplete="off"
-                    >
+                        autocomplete="off">
                     <datalist id="companyDestinationsList">
                         <?php foreach ($destinations as $dest): ?>
                             <option value="<?= htmlspecialchars($dest, ENT_QUOTES, 'UTF-8') ?>">
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
                     </datalist>
                 </div>
 
@@ -372,18 +379,18 @@ $seoStructuredData = [
         <div class="company-tours-grid" id="companyToursGrid">
             <?php if (!empty($tours)): ?>
                 <?php foreach ($tours as $tour): ?>
-                    <?php 
-                        $tourImg = !empty($tour['hero_image_url']) ? $tour['hero_image_url'] : (!empty($tour['image_url']) ? $tour['image_url'] : 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&h=400&fit=crop');
-                        $tourSlug = seoSlug($tour['name']);
-                        $compSlug = seoSlug($companyName);
-                        $tourDetailUrl = "/tours/{$compSlug}/{$tourSlug}/{$tour['id']}";
-                        $tourRating = number_format((float) ($tour['rating'] ?? 4.8), 1);
+                    <?php
+                    $tourImg = !empty($tour['hero_image_url']) ? $tour['hero_image_url'] : (!empty($tour['image_url']) ? $tour['image_url'] : 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&h=400&fit=crop');
+                    $tourSlug = seoSlug($tour['name']);
+                    $compSlug = seoSlug($companyName);
+                    $tourDetailUrl = "/tours/{$compSlug}/{$tourSlug}/{$tour['id']}";
+                    $tourRating = number_format((float) ($tour['rating'] ?? 4.8), 1);
                     ?>
-                    <article class="tour-card-item" 
-                             data-destination="<?= htmlspecialchars($tour['destination'], ENT_QUOTES, 'UTF-8') ?>" 
-                             data-category="<?= htmlspecialchars($tour['category'], ENT_QUOTES, 'UTF-8') ?>" 
-                             data-price="<?= htmlspecialchars((string) $tour['price'], ENT_QUOTES, 'UTF-8') ?>" 
-                             data-name="<?= htmlspecialchars($tour['name'], ENT_QUOTES, 'UTF-8') ?>">
+                    <article class="tour-card-item"
+                        data-destination="<?= htmlspecialchars($tour['destination'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-category="<?= htmlspecialchars($tour['category'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-price="<?= htmlspecialchars((string) $tour['price'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-name="<?= htmlspecialchars($tour['name'], ENT_QUOTES, 'UTF-8') ?>">
                         <div class="tour-card-item__media">
                             <img src="<?= htmlspecialchars($tourImg, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($tour['name'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                             <?php if (!empty($tour['badge'])): ?>
@@ -431,51 +438,51 @@ $seoStructuredData = [
 
     <!-- Company Fleet Section -->
     <?php if (!empty($vehicles)): ?>
-    <section class="company-fleet-section" id="fleet">
-        <div class="section-eyebrow">Flota & Confort</div>
-        <h2 class="section-heading">Nuestras unidades de transporte</h2>
-        <p style="color: var(--muted); font-size: 0.95rem;">Vehículos modernos equipados para garantizar un trayecto cómodo, panorámico y seguro en cada expedición.</p>
+        <section class="company-fleet-section" id="fleet">
+            <div class="section-eyebrow">Flota & Confort</div>
+            <h2 class="section-heading">Nuestras unidades de transporte</h2>
+            <p style="color: var(--muted); font-size: 0.95rem;">Vehículos modernos equipados para garantizar un trayecto cómodo, panorámico y seguro en cada expedición.</p>
 
-        <div class="fleet-grid">
-            <?php foreach ($vehicles as $vehicle): ?>
-                <?php 
-                    $coverPhoto = !empty($vehicle['photos'][0]['image_url']) 
-                        ? $vehicle['photos'][0]['image_url'] 
+            <div class="fleet-grid">
+                <?php foreach ($vehicles as $vehicle): ?>
+                    <?php
+                    $coverPhoto = !empty($vehicle['photos'][0]['image_url'])
+                        ? $vehicle['photos'][0]['image_url']
                         : 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop';
-                ?>
-                <div class="vehicle-card-modern">
-                    <div class="vehicle-card-modern__img">
-                        <img src="<?= htmlspecialchars($coverPhoto, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($vehicle['brand'] . ' ' . $vehicle['model'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
-                        <span class="vehicle-status-tag">Unidad Verificada</span>
-                    </div>
-                    <div class="vehicle-card-modern__body">
-                        <h4 class="vehicle-card-modern__title"><?= htmlspecialchars($vehicle['brand'] . ' ' . $vehicle['model'], ENT_QUOTES, 'UTF-8') ?></h4>
-                        <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 0.75rem;">
-                            Año <?= htmlspecialchars((string) ($vehicle['vehicle_year'] ?? '2023'), ENT_QUOTES, 'UTF-8') ?> &bull; Placa <?= htmlspecialchars($vehicle['license_plate'], ENT_QUOTES, 'UTF-8') ?>
+                    ?>
+                    <div class="vehicle-card-modern">
+                        <div class="vehicle-card-modern__img">
+                            <img src="<?= htmlspecialchars($coverPhoto, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($vehicle['brand'] . ' ' . $vehicle['model'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                            <span class="vehicle-status-tag">Unidad Verificada</span>
                         </div>
+                        <div class="vehicle-card-modern__body">
+                            <h4 class="vehicle-card-modern__title"><?= htmlspecialchars($vehicle['brand'] . ' ' . $vehicle['model'], ENT_QUOTES, 'UTF-8') ?></h4>
+                            <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 0.75rem;">
+                                Año <?= htmlspecialchars((string) ($vehicle['vehicle_year'] ?? '2023'), ENT_QUOTES, 'UTF-8') ?> &bull; Placa <?= htmlspecialchars($vehicle['license_plate'], ENT_QUOTES, 'UTF-8') ?>
+                            </div>
 
-                        <div class="vehicle-features-list">
-                            <span class="vehicle-feature-badge">💺 <?= htmlspecialchars((string) $vehicle['seat_capacity'], ENT_QUOTES, 'UTF-8') ?> Asientos reclinables</span>
-                            <?php if (!empty($vehicle['accessible_seats']) && $vehicle['accessible_seats'] > 0): ?>
-                                <span class="vehicle-feature-badge">♿ <?= $vehicle['accessible_seats'] ?> Asientos accesibles</span>
+                            <div class="vehicle-features-list">
+                                <span class="vehicle-feature-badge">💺 <?= htmlspecialchars((string) $vehicle['seat_capacity'], ENT_QUOTES, 'UTF-8') ?> Asientos reclinables</span>
+                                <?php if (!empty($vehicle['accessible_seats']) && $vehicle['accessible_seats'] > 0): ?>
+                                    <span class="vehicle-feature-badge">♿ <?= $vehicle['accessible_seats'] ?> Asientos accesibles</span>
+                                <?php endif; ?>
+                                <?php if (!empty($vehicle['luggage_capacity'])): ?>
+                                    <span class="vehicle-feature-badge">🧳 <?= htmlspecialchars($vehicle['luggage_capacity'], ENT_QUOTES, 'UTF-8') ?></span>
+                                <?php endif; ?>
+                                <span class="vehicle-feature-badge">❄️ Aire Acondicionado</span>
+                                <span class="vehicle-feature-badge">📶 Wi-Fi a bordo</span>
+                            </div>
+
+                            <?php if (!empty($vehicle['notes'])): ?>
+                                <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; font-style: italic;">
+                                    "<?= htmlspecialchars($vehicle['notes'], ENT_QUOTES, 'UTF-8') ?>"
+                                </p>
                             <?php endif; ?>
-                            <?php if (!empty($vehicle['luggage_capacity'])): ?>
-                                <span class="vehicle-feature-badge">🧳 <?= htmlspecialchars($vehicle['luggage_capacity'], ENT_QUOTES, 'UTF-8') ?></span>
-                            <?php endif; ?>
-                            <span class="vehicle-feature-badge">❄️ Aire Acondicionado</span>
-                            <span class="vehicle-feature-badge">📶 Wi-Fi a bordo</span>
                         </div>
-
-                        <?php if (!empty($vehicle['notes'])): ?>
-                            <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; font-style: italic;">
-                                "<?= htmlspecialchars($vehicle['notes'], ENT_QUOTES, 'UTF-8') ?>"
-                            </p>
-                        <?php endif; ?>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </section>
+                <?php endforeach; ?>
+            </div>
+        </section>
     <?php endif; ?>
 
     <!-- Company Reviews Section -->
@@ -643,7 +650,7 @@ $seoStructuredData = [
                         <?= htmlspecialchars(substr($companyDescription, 0, 160), ENT_QUOTES, 'UTF-8') ?>...
                     </p>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4 class="footer-heading">Contacto</h4>
                     <ul class="footer-links">
@@ -652,7 +659,7 @@ $seoStructuredData = [
                         <li><?= htmlspecialchars($companyLocation, ENT_QUOTES, 'UTF-8') ?></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4 class="footer-heading">Enlaces Rápidos</h4>
                     <ul class="footer-links">
@@ -665,7 +672,7 @@ $seoStructuredData = [
                         <li><a href="#reviews">Reseñas</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4 class="footer-heading">Garantía</h4>
                     <ul class="footer-links">
@@ -676,7 +683,7 @@ $seoStructuredData = [
                     </ul>
                 </div>
             </div>
-            
+
             <div class="footer-bottom">
                 <div class="social-links">
                     <a href="#" aria-label="Facebook">Facebook</a>
@@ -696,4 +703,5 @@ $seoStructuredData = [
     <script src="/tours/assets/js/api.js"></script>
     <script src="/tours/assets/js/company.js"></script>
 </body>
+
 </html>

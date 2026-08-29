@@ -4,18 +4,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
     const dropdownItems = document.querySelectorAll('.nav-item.dropdown');
-    
+
     // Toggle mobile menu
     navToggle.addEventListener('click', () => {
         navMenu.classList.toggle('active');
-        
+
         // Animate hamburger
         const spans = navToggle.querySelectorAll('span');
         spans[0].style.transform = navMenu.classList.contains('active') ? 'rotate(45deg) translate(5px, 5px)' : 'none';
         spans[1].style.opacity = navMenu.classList.contains('active') ? '0' : '1';
         spans[2].style.transform = navMenu.classList.contains('active') ? 'rotate(-45deg) translate(7px, -6px)' : 'none';
     });
-    
+
     // Handle dropdown toggles on mobile
     dropdownItems.forEach(item => {
         const toggle = item.querySelector('.dropdown-toggle');
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
+
     // Close mobile menu on link click
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
+
     // Smooth scroll for navigation links
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 const targetId = link.getAttribute('href');
                 const targetSection = document.querySelector(targetId);
-                
+
                 if (targetSection) {
                     const offsetTop = targetSection.offsetTop - 80;
                     window.scrollTo({
@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
+
     // Handle dropdown links
     document.querySelectorAll('.dropdown-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = link.getAttribute('href');
             const targetSection = document.querySelector(targetId);
-            
+
             if (targetSection) {
                 const offsetTop = targetSection.offsetTop - 80;
                 window.scrollTo({
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     behavior: 'smooth'
                 });
             }
-            
+
             // Close mobile menu if open
             if (window.innerWidth <= 768) {
                 navMenu.classList.remove('active');
@@ -84,20 +84,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
+
     // Navbar scroll effect
     let lastScrollTop = 0;
     const navbar = document.querySelector('.navbar');
-    
+
     window.addEventListener('scroll', () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
+
         if (scrollTop > lastScrollTop && scrollTop > 100) {
             navbar.style.transform = 'translateY(-100%)';
         } else {
             navbar.style.transform = 'translateY(0)';
         }
-        
+
         lastScrollTop = scrollTop;
     });
 });
@@ -124,7 +124,7 @@ const updateScrollIndicator = () => {
     const scrolled = window.pageYOffset;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const progress = (scrolled / maxScroll) * 100;
-    
+
     const scrollIndicator = document.querySelector('.scroll-indicator');
     if (scrollIndicator) {
         const opacity = Math.max(0, 1 - (scrolled / 300));
@@ -175,12 +175,12 @@ const updateParallax = () => {
 
 // Improved hover effects with subtle animations
 document.querySelectorAll('.detail-card, .highlight-item').forEach(card => {
-    card.addEventListener('mouseenter', function() {
+    card.addEventListener('mouseenter', function () {
         this.style.transform = 'translateY(-8px) scale(1.02)';
         this.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
     });
-    
-    card.addEventListener('mouseleave', function() {
+
+    card.addEventListener('mouseleave', function () {
         this.style.transform = 'translateY(0) scale(1)';
     });
 });
@@ -195,7 +195,7 @@ class TourCarousel {
         this.nextBtn = document.querySelector('.carousel-btn.next');
         this.currentIndex = 0;
         this.slidesPerView = this.getSlidesPerView();
-        
+
         this.init();
     }
 
@@ -251,11 +251,11 @@ class TourCarousel {
     updateCarousel() {
         const translateX = -(this.currentIndex * (100 / this.slidesPerView));
         this.track.style.transform = `translateX(${translateX}%)`;
-        
+
         // Update button states
         this.prevBtn.style.opacity = this.currentIndex === 0 ? '0.5' : '1';
         this.prevBtn.style.cursor = this.currentIndex === 0 ? 'not-allowed' : 'pointer';
-        
+
         const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
         this.nextBtn.style.opacity = this.currentIndex >= maxIndex ? '0.5' : '1';
         this.nextBtn.style.cursor = this.currentIndex >= maxIndex ? 'not-allowed' : 'pointer';
@@ -267,12 +267,12 @@ class MinimalCarousel {
     constructor() {
         this.container = document.querySelector('.minimal-carousel-container');
         if (!this.container) return;
-        
+
         this.track = this.container.querySelector('.minimal-carousel-track');
         this.slides = this.container.querySelectorAll('.minimal-carousel-slide');
         this.dots = this.container.querySelectorAll('.minimal-dot');
         this.currentIndex = 0;
-        
+
         this.init();
     }
 
@@ -292,12 +292,12 @@ class MinimalCarousel {
 
     updateSlide(index) {
         if (index < 0 || index >= this.slides.length) return;
-        
+
         this.currentIndex = index;
-        
+
         // Update track position with proper transform
         this.track.style.transform = `translateX(-${index * 100}%)`;
-        
+
         // Update active dot
         this.dots.forEach((dot, i) => {
             dot.classList.toggle('active', i === index);
@@ -330,7 +330,7 @@ let calendarInstance;
 
 document.addEventListener('DOMContentLoaded', () => {
     calendarInstance = new TourCalendar();
-    
+
     const reserveBtn = document.querySelector('.booking-sidebar .btn-reserve');
     if (reserveBtn) {
         reserveBtn.addEventListener('click', () => {
@@ -346,38 +346,38 @@ document.addEventListener('DOMContentLoaded', () => {
 function bindItineraryInteractions() {
     const accordionItems = document.querySelectorAll('.accordion-item');
     const tabButtons = document.querySelectorAll('.tab-button');
-    
+
     // Handle accordion clicks
     accordionItems.forEach(item => {
         const header = item.querySelector('.accordion-header');
         header.addEventListener('click', () => {
             const isActive = item.classList.contains('active');
-            
+
             // Close all items
             accordionItems.forEach(accordion => {
                 accordion.classList.remove('active');
             });
-            
+
             // Open clicked item if it wasn't active
             if (!isActive) {
                 item.classList.add('active');
             }
         });
     });
-    
+
     // Handle tab filtering
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const filter = button.dataset.day;
-            
+
             // Update active tab
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            
+
             // Filter accordion items
             accordionItems.forEach(item => {
                 const dayNumber = parseInt(item.dataset.day);
-                
+
                 if (filter === 'all') {
                     item.classList.remove('hidden');
                 } else if (filter === '1-3') {
@@ -386,12 +386,12 @@ function bindItineraryInteractions() {
                     item.classList.toggle('hidden', dayNumber < 4 || dayNumber > 7);
                 }
             });
-            
+
             // Close all open accordions when switching tabs
             accordionItems.forEach(item => item.classList.remove('active'));
         });
     });
-    
+
     // Set initial state - close all accordion items
     accordionItems.forEach(item => item.classList.remove('active'));
     const allTab = document.querySelector('.tab-button[data-day="all"]');
@@ -421,15 +421,15 @@ class TourCalendar {
     renderCalendar() {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
-        
+
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
-        
+
         const monthNames = [
             'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
             'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
         ];
-        
+
         const calendarHTML = `
             <div class="calendar-header">
                 <button type="button" class="calendar-nav" id="prevMonth">‹</button>
@@ -453,7 +453,7 @@ class TourCalendar {
                 </tbody>
             </table>
         `;
-        
+
         this.container.innerHTML = calendarHTML;
         this.bindCalendarEvents();
         this.bindNavigationEvents();
@@ -463,38 +463,38 @@ class TourCalendar {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
         let html = '<tr>';
-        
+
         // Empty cells for days before month starts
         for (let i = 0; i < firstDay.getDay(); i++) {
             html += '<td class="disabled"></td>';
         }
-        
+
         // Calendar days
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const isAvailable = this.availableDates.includes(dateStr);
             const isPast = new Date(year, month, day) < new Date();
-            
+
             let className = 'disabled';
             let clickHandler = '';
-            
+
             if (isAvailable) {
                 className = 'available';
                 clickHandler = `data-date="${dateStr}"`;
             } else if (!isPast) {
                 className = 'unavailable';
             }
-            
+
             const departure = this.departuresByDate[dateStr];
             const priceMarkup = departure ? `<small class="calendar-price">${escapeDetailHtml(departure.price)} ${escapeDetailHtml(departure.currency)}</small>` : '';
             html += `<td class="${className}" ${clickHandler}><span class="calendar-day">${day}</span>${priceMarkup}</td>`;
-            
+
             // Close row after Sunday
             if ((firstDay.getDay() + day) % 7 === 0) {
                 html += '</tr><tr>';
             }
         }
-        
+
         html += '</tr>';
         return html;
     }
@@ -508,7 +508,7 @@ class TourCalendar {
                 if (previousSelected) {
                     previousSelected.classList.remove('selected');
                 }
-                
+
                 // Set new selection
                 this.selectedDate = e.currentTarget.dataset.date;
                 const departure = this.departuresByDate[this.selectedDate];
@@ -524,12 +524,12 @@ class TourCalendar {
     bindNavigationEvents() {
         const prevBtn = this.container.querySelector('#prevMonth');
         const nextBtn = this.container.querySelector('#nextMonth');
-        
+
         prevBtn.addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() - 1);
             this.renderCalendar();
         });
-        
+
         nextBtn.addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() + 1);
             this.renderCalendar();
@@ -715,7 +715,7 @@ function renderReviews(reviews, targetId, defaultType = 'tour') {
                     if (!isNaN(parsedDate.getTime())) {
                         dateText = parsedDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
             return `
                 <article class="review-card">
@@ -767,7 +767,7 @@ function renderReviews(reviews, targetId, defaultType = 'tour') {
 function renderTourDetail(payload) {
     const { tour, related_tours = [], tour_reviews = [], company_reviews = [], quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures, vehicles } = payload;
     document.title = `${tour.name} - Viajero`;
-    
+
     const companyId = tour.company_id || 1;
     const compSlug = (tour.company_name || 'compania')
         .toLowerCase()
@@ -778,10 +778,10 @@ function renderTourDetail(payload) {
     const companyUrl = `/tours/compania-de-tours/${compSlug}/${companyId}`;
 
     const brandEl = document.querySelector('.nav-brand h1');
-    if (brandEl) brandEl.textContent = tour.company_name;
+    //if (brandEl) brandEl.textContent = tour.company_name;
 
     const brandLink = document.querySelector('.nav-brand a');
-    if (brandLink) brandLink.href = companyUrl;
+    //if (brandLink) brandLink.href = companyUrl;
 
     document.querySelector('.hero-badge').textContent = tour.badge || tour.category;
     document.querySelector('#heroRating').innerHTML = `
@@ -792,17 +792,17 @@ function renderTourDetail(payload) {
     // Render Company Showcase Section
     const tradeNameEl = document.getElementById('companyTradeName');
     if (tradeNameEl) tradeNameEl.textContent = tour.company_name || 'Operador Local';
-    
+
     const legalNameEl = document.getElementById('companyLegalName');
     if (legalNameEl) {
-        legalNameEl.textContent = tour.company_legal_name && tour.company_legal_name !== tour.company_name 
-            ? `${tour.company_legal_name} • Razón Social` 
+        legalNameEl.textContent = tour.company_legal_name && tour.company_legal_name !== tour.company_name
+            ? `${tour.company_legal_name} • Razón Social`
             : `${tour.company_city || 'Cusco'}, ${tour.company_country || 'Perú'}`;
     }
-    
+
     const companyDescEl = document.getElementById('companyDescription');
     if (companyDescEl) {
-        companyDescEl.textContent = tour.company_description 
+        companyDescEl.textContent = tour.company_description
             || 'Operador turístico certificado especializado en salidas grupales, transporte de primera clase y guías locales expertos.';
     }
 
@@ -810,7 +810,7 @@ function renderTourDetail(payload) {
     if (companyRatingNumEl) {
         companyRatingNumEl.textContent = Number(tour.company_rating || 4.8).toFixed(1);
     }
-    
+
     const companyProfileLink = document.getElementById('companyProfileLink');
     if (companyProfileLink) {
         companyProfileLink.href = companyUrl;
@@ -999,19 +999,19 @@ class BookingModal {
         this.closeBtn = document.getElementById('modalClose');
         this.confirmBtn = document.getElementById('confirmBooking');
         this.dateSpan = document.querySelector('#modalDate span');
-        
+
         this.passengers = {
             adults: 1,
             children: 0,
             seniors: 0
         };
-        
+
         this.prices = {
             adults: 1299,
             children: 649,
             seniors: 1039
         };
-        
+
         this.init();
     }
 
@@ -1025,7 +1025,7 @@ class BookingModal {
         this.reserveBtn.addEventListener('click', () => this.open());
         this.closeBtn.addEventListener('click', () => this.close());
         this.confirmBtn.addEventListener('click', () => this.confirm());
-        
+
         // Handle counter buttons
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('counter-btn')) {
@@ -1082,7 +1082,7 @@ class BookingModal {
         const current = this.passengers[type];
         const newValue = action === 'increase' ? current + 1 : Math.max(0, current - 1);
         const availableSeats = this.getAvailableSeats();
-        
+
         // Check if adding would exceed available slots
         const totalPeople = Object.entries(this.passengers).reduce((sum, [passengerType, count]) => {
             const countToAdd = passengerType === type ? newValue : count;
@@ -1093,10 +1093,10 @@ class BookingModal {
             alert(`Sólo hay ${availableSeats} cupo${availableSeats === 1 ? '' : 's'} disponible${availableSeats === 1 ? '' : 's'} para esta salida.`);
             return;
         }
-        
+
         // Prevent negative values
         if (newValue < 0) return;
-        
+
         this.passengers[type] = newValue;
         this.updateDisplay();
     }
@@ -1123,7 +1123,7 @@ class BookingModal {
 
         const departureCapacity = this.getAvailableSeats();
         const availableSlots = Math.max(0, departureCapacity - totalPeople);
-        document.getElementById('availabilityText').innerHTML = 
+        document.getElementById('availabilityText').innerHTML =
             `Disponibilidad: <span class="${availableSlots > 0 ? 'available' : 'unavailable'}">${availableSlots} cupo${availableSlots !== 1 ? 's' : ''} restante${availableSlots !== 1 ? 's' : ''}</span>`;
 
         // Update confirm button state

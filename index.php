@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
@@ -63,7 +64,6 @@ try {
         LIMIT 6
     ');
     $globalReviews = $revStmt->fetchAll();
-
 } catch (Throwable $e) {
     // Si la BD no está disponible, se mantienen arrays vacíos
 }
@@ -81,13 +81,14 @@ if (!empty($tours)) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viajero - Experiencias grupales y tours de fin de semana</title>
+    <title>Weekender - Experiencias grupales y tours de fin de semana</title>
     <meta name="description" content="Descubre y reserva tours de fin de semana, escapadas grupales y excursiones con los mejores operadores turísticos locales.">
     <link rel="canonical" href="http://<?= htmlspecialchars($_SERVER['HTTP_HOST'] ?? 'localhost', ENT_QUOTES, 'UTF-8') ?>/tours/">
-    
+
     <!-- Fonts & Bootstrap -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,6 +97,7 @@ if (!empty($tours)) {
     <link rel="stylesheet" href="/tours/assets/css/theme.css">
     <link rel="stylesheet" href="/tours/assets/css/styles.css">
 </head>
+
 <body>
     <header class="header">
         <nav class="nav">
@@ -103,17 +105,17 @@ if (!empty($tours)) {
                 <a href="/tours/" style="text-decoration: none; color: inherit;">
                     <h1 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
                         <span>✨</span>
-                        <span>viajero</span>
+                        <span>Weekender</span>
                     </h1>
                 </a>
             </div>
-            
+
             <button class="nav__toggle" aria-label="Toggle menu">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            
+
             <div class="nav__menu">
                 <a href="#tours-catalog" class="btn btn--ghost">Explorar Tours</a>
                 <a href="#operators" class="btn btn--ghost">Operadores</a>
@@ -137,7 +139,7 @@ if (!empty($tours)) {
                 </div>
                 <div class="hero-search__overlay"></div>
             </div>
-            
+
             <div class="hero-search__content">
                 <div class="hero__content">
                     <h2 class="hero__title">Descubre experiencias inolvidables</h2>
@@ -148,27 +150,26 @@ if (!empty($tours)) {
                     <form class="search__form">
                         <div class="search__group">
                             <label for="destination" class="search__label">Destino</label>
-                            <input 
-                                type="text" 
-                                id="destination" 
-                                class="search__input" 
+                            <input
+                                type="text"
+                                id="destination"
+                                class="search__input"
                                 placeholder="Ej: Cusco, Valle Sagrado..."
                                 list="destinations"
-                                autocomplete="off"
-                            >
+                                autocomplete="off">
                             <datalist id="destinations">
                                 <?php if (!empty($destinations)): ?>
                                     <?php foreach ($destinations as $dest): ?>
                                         <option value="<?= htmlspecialchars($dest, ENT_QUOTES, 'UTF-8') ?>">
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <option value="Cusco y Machu Picchu">
-                                    <option value="Valle Sagrado">
-                                    <option value="Soraypampa">
-                                    <option value="Vinicunca">
-                                    <option value="Cañón del Colca">
-                                    <option value="Chinchero">
-                                <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <option value="Cusco y Machu Picchu">
+                                        <option value="Valle Sagrado">
+                                        <option value="Soraypampa">
+                                        <option value="Vinicunca">
+                                        <option value="Cañón del Colca">
+                                        <option value="Chinchero">
+                                        <?php endif; ?>
                             </datalist>
                         </div>
 
@@ -191,16 +192,15 @@ if (!empty($tours)) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        
+
                         <div class="search__group">
                             <label for="dateRange" class="search__label">Fechas</label>
-                            <input 
-                                type="text" 
-                                id="dateRange" 
-                                class="search__input search__input--date-range" 
+                            <input
+                                type="text"
+                                id="dateRange"
+                                class="search__input search__input--date-range"
                                 placeholder="Seleccionar fechas"
-                                readonly
-                            >
+                                readonly>
                         </div>
 
                         <button type="submit" class="btn-hero-search">
@@ -248,12 +248,12 @@ if (!empty($tours)) {
             <div class="companies-grid">
                 <?php if (!empty($companies)): ?>
                     <?php foreach ($companies as $company): ?>
-                        <?php 
-                            $cName = $company['trade_name'] ?? $company['legal_name'];
-                            $cSlug = seoSlug($cName);
-                            $cUrl = "/tours/compania-de-tours/{$cSlug}/{$company['id']}";
-                            $cRating = number_format((float) ($company['rating'] ?? 4.8), 1);
-                            $cLocation = trim(($company['city'] ?? '') . ', ' . ($company['country'] ?? ''), ', ');
+                        <?php
+                        $cName = $company['trade_name'] ?? $company['legal_name'];
+                        $cSlug = seoSlug($cName);
+                        $cUrl = "/tours/compania-de-tours/{$cSlug}/{$company['id']}";
+                        $cRating = number_format((float) ($company['rating'] ?? 4.8), 1);
+                        $cLocation = trim(($company['city'] ?? '') . ', ' . ($company['country'] ?? ''), ', ');
                         ?>
                         <article class="company-card-home">
                             <div class="company-card-home__top">
@@ -316,13 +316,13 @@ if (!empty($tours)) {
             <div class="results__grid">
                 <?php if (!empty($tours)): ?>
                     <?php foreach ($tours as $tour): ?>
-                        <?php 
-                            $tCompSlug = seoSlug($tour['company_name']);
-                            $tTourSlug = seoSlug($tour['name']);
-                            $tTourUrl = "/tours/{$tCompSlug}/{$tTourSlug}/{$tour['id']}";
-                            $tCompUrl = "/tours/compania-de-tours/{$tCompSlug}/{$tour['company_id']}";
-                            $tImg = $tour['image_url'] ?? $tour['hero_image_url'] ?? 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=500&h=350&fit=crop';
-                            $tRating = number_format((float) ($tour['rating'] ?? 4.8), 1);
+                        <?php
+                        $tCompSlug = seoSlug($tour['company_name']);
+                        $tTourSlug = seoSlug($tour['name']);
+                        $tTourUrl = "/tours/{$tCompSlug}/{$tTourSlug}/{$tour['id']}";
+                        $tCompUrl = "/tours/compania-de-tours/{$tCompSlug}/{$tour['company_id']}";
+                        $tImg = $tour['image_url'] ?? $tour['hero_image_url'] ?? 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=500&h=350&fit=crop';
+                        $tRating = number_format((float) ($tour['rating'] ?? 4.8), 1);
                         ?>
                         <article class="tour-card" data-category="<?= htmlspecialchars($tour['category'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                             <div class="tour-image-container">
@@ -504,10 +504,10 @@ if (!empty($tours)) {
     <footer class="footer">
         <div class="footer__container">
             <div class="footer__brand">
-                <h3>viajero</h3>
+                <h3>Weekender</h3>
                 <p>Plataforma para descubrir escapadas de fin de semana, excursiones grupales y operadores turísticos certificados.</p>
             </div>
-            
+
             <div class="footer__links">
                 <div class="footer__section">
                     <h4>Explorar</h4>
@@ -515,7 +515,7 @@ if (!empty($tours)) {
                     <a href="#operators">Operadores de Tours</a>
                     <a href="#global-reviews">Reseñas</a>
                 </div>
-                
+
                 <div class="footer__section">
                     <h4>Soporte</h4>
                     <a href="#">Centro de ayuda</a>
@@ -523,7 +523,7 @@ if (!empty($tours)) {
                     <a href="#">Términos y condiciones</a>
                     <a href="#">Privacidad</a>
                 </div>
-                
+
                 <div class="footer__section">
                     <h4>Sobre nosotros</h4>
                     <a href="#">Quiénes somos</a>
@@ -532,7 +532,7 @@ if (!empty($tours)) {
                 </div>
             </div>
         </div>
-        
+
         <div class="footer__bottom">
             <p>&copy; <?= date('Y') ?> viajero. Todos los derechos reservados.</p>
         </div>
@@ -543,4 +543,5 @@ if (!empty($tours)) {
     <script src="assets/js/api.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
+
 </html>

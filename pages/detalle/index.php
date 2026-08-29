@@ -29,7 +29,7 @@ $companyRating = number_format((float) ($seoTour['company_rating'] ?? 4.8), 1);
 $companyDesc = $seoTour['company_description'] ?? 'Operador turístico certificado con amplia trayectoria en salidas grupales, transporte de primera clase y guías locales expertos.';
 
 
-$seoTitle = $seoTour ? $seoTour['name'] . ' | ' . $seoTour['company_name'] . ' | Viajero' : 'Tours y experiencias | Viajero';
+$seoTitle = $seoTour ? $seoTour['name'] . ' | ' . $seoTour['company_name'] . ' | Weekender' : 'Tours y experiencias | Weekender';
 $seoDescription = $seoTour ? $seoTour['description'] : 'Descubre tours y experiencias grupales con operadores especializados.';
 $seoImage = $seoTour['hero_image_url'] ?? $seoTour['image_url'] ?? 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&h=630&fit=crop';
 $seoPath = $seoTour ? seoSlug($seoTour['company_name']) . '/' . seoSlug($seoTour['name']) . '/' . $seoTour['id'] : '';
@@ -56,11 +56,12 @@ $seoStructuredData = $seoTour ? [
 ] : [
     '@context' => 'https://schema.org',
     '@type' => 'WebSite',
-    'name' => 'Viajero',
+    'name' => 'Weekender',
     'url' => 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/tours/'
 ];
 ?>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,18 +78,24 @@ $seoStructuredData = $seoTour ? [
     <meta name="twitter:title" content="<?= htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8') ?>">
     <meta name="twitter:description" content="<?= htmlspecialchars($seoDescription, ENT_QUOTES, 'UTF-8') ?>">
     <meta name="twitter:image" content="<?= htmlspecialchars($seoImage, ENT_QUOTES, 'UTF-8') ?>">
-    <script type="application/ld+json"><?= json_encode($seoStructuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
+    <script type="application/ld+json">
+        <?= json_encode($seoStructuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/tours/assets/css/theme.css">
     <link rel="stylesheet" href="/tours/assets/css/detail.css">
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <a href="<?= htmlspecialchars($companyUrl, ENT_QUOTES, 'UTF-8') ?>" style="text-decoration: none; color: inherit;" title="Ver perfil de la compañía">
-                    <h1><?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') ?></h1>
+                <a href="/tours/" style="text-decoration: none; color: inherit;">
+                    <h1 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                        <span>✨</span>
+                        <span>Weekender</span>
+                    </h1>
                 </a>
             </div>
             <div class="nav-menu">
@@ -343,7 +350,7 @@ $seoStructuredData = $seoTour ? [
                             <button class="tab-button" data-day="1-3">Días 1-3</button>
                             <button class="tab-button" data-day="4-7">Días 4-7</button>
                         </div>
-                        
+
                         <div class="itinerary-accordion">
                             <div class="accordion-item active" data-day="1">
                                 <div class="accordion-header">
@@ -463,7 +470,7 @@ $seoStructuredData = $seoTour ? [
                 <aside class="booking-sidebar">
                     <div class="booking-content">
                         <h3 class="booking-title">Reserva tu Aventura</h3>
-                        
+
                         <div class="minimal-carousel">
                             <div class="minimal-carousel-container">
                                 <div class="minimal-carousel-track">
@@ -482,9 +489,9 @@ $seoStructuredData = $seoTour ? [
                                 </div>
                             </div>
                         </div>
-                        
-                        
-                        
+
+
+
                         <div class="price-list">
                             <div class="price-item">
                                 <span class="price-label">Adulto</span>
@@ -499,7 +506,7 @@ $seoStructuredData = $seoTour ? [
                                 <span class="price-value">$1,039</span>
                             </div>
                         </div>
-                        
+
                         <div class="calendar-section">
                             <h4 class="calendar-title">Fechas de Salida</h4>
                             <p class="departure-price" id="departurePrice">Selecciona una fecha para consultar el precio.</p>
@@ -507,8 +514,8 @@ $seoStructuredData = $seoTour ? [
                                 <!-- Calendar will be generated by JavaScript -->
                             </div>
                         </div>
-<button class="btn-reserve minimal-btn">RESERVAR AHORA</button>
-                      
+                        <button class="btn-reserve minimal-btn">RESERVAR AHORA</button>
+
                     </div>
                 </aside>
             </div>
@@ -530,7 +537,7 @@ $seoStructuredData = $seoTour ? [
             <button class="modal-close" id="modalClose">×</button>
             <h3 class="modal-title">Reserva tu Aventura</h3>
             <p class="modal-date" id="modalDate">Fecha seleccionada: <span></span></p>
-            
+
             <div class="booking-form">
                 <div class="passenger-selector">
                     <label>Adultos</label>
@@ -541,7 +548,7 @@ $seoStructuredData = $seoTour ? [
                     </div>
                     <span class="price-detail">$1,299 c/u</span>
                 </div>
-                
+
                 <div class="passenger-selector">
                     <label>Niños (5-12 años)</label>
                     <div class="counter">
@@ -551,7 +558,7 @@ $seoStructuredData = $seoTour ? [
                     </div>
                     <span class="price-detail">$649 c/u</span>
                 </div>
-                
+
                 <div class="passenger-selector">
                     <label>Tercera Edad (60+)</label>
                     <div class="counter">
@@ -561,11 +568,11 @@ $seoStructuredData = $seoTour ? [
                     </div>
                     <span class="price-detail">$1,039 c/u</span>
                 </div>
-                
+
                 <div class="availability-status">
                     <span id="availabilityText">Disponibilidad: <span class="available">12 cupos disponibles</span></span>
                 </div>
-                
+
                 <div class="booking-summary">
                     <div class="summary-item">
                         <span>Total de personas</span>
@@ -576,7 +583,7 @@ $seoStructuredData = $seoTour ? [
                         <span id="totalPrice">$1,299</span>
                     </div>
                 </div>
-                
+
                 <button class="minimal-btn" id="confirmBooking">CONFIRMAR RESERVA</button>
             </div>
         </div>
@@ -677,306 +684,307 @@ $seoStructuredData = $seoTour ? [
     </section>
 
     <section class="related-tours-section">
-            <div class="container">
-                
-                <h2 class="section-title">Más experiencias</h2>
-                
-                <div class="tours-carousel">
-                    <div class="carousel-container">
-                        <div class="carousel-track" id="relatedToursTrack">
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1533002535226-22da29157c0f?w=400&h=250&fit=crop" alt="Machu Picchu Express" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$899</span>
-                                                <span class="tour-days">3 días</span>
-                                            </div>
+        <div class="container">
+
+            <h2 class="section-title">Más experiencias</h2>
+
+            <div class="tours-carousel">
+                <div class="carousel-container">
+                    <div class="carousel-track" id="relatedToursTrack">
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1533002535226-22da29157c0f?w=400&h=250&fit=crop" alt="Machu Picchu Express" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$899</span>
+                                            <span class="tour-days">3 días</span>
                                         </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Machu Picchu Express</h3>
-                                        <p class="tour-description">Descubre la ciudadela inca en un tour exprés perfecto para quienes tienen poco tiempo.</p>
-                                        <button class="btn-more-info">ver más</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400&h=250&fit=crop" alt="Inca Trail Clásico" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$1,299</span>
-                                                <span class="tour-days">4 días</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Inca Trail Clásico</h3>
-                                        <p class="tour-description">La caminata más emblemática de Sudamérica hasta la puerta del sol de Machu Picchu.</p>
-                                        <button class="btn-more-info">ver más</button>
-                                    </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Machu Picchu Express</h3>
+                                    <p class="tour-description">Descubre la ciudadela inca en un tour exprés perfecto para quienes tienen poco tiempo.</p>
+                                    <button class="btn-more-info">ver más</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=250&fit=crop" alt="Amazonía Peruana" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$1,599</span>
-                                                <span class="tour-days">5 días</span>
-                                            </div>
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400&h=250&fit=crop" alt="Inca Trail Clásico" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$1,299</span>
+                                            <span class="tour-days">4 días</span>
                                         </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Amazonía Peruana</h3>
-                                        <p class="tour-description">Explora la selva amazónica peruana con alojamiento en eco-lodges de lujo.</p>
-                                        <button class="btn-more-info">ver más</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1518509565194-3a8d63d0f4c3?w=400&h=250&fit=crop" alt="Lago Titicaca" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$799</span>
-                                                <span class="tour-days">2 días</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Lago Titicaca</h3>
-                                        <p class="tour-description">Navega por el lago navegable más alto del mundo y visita las islas flotantes.</p>
-                                        <button class="btn-more-info">ver más</button>
-                                    </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Inca Trail Clásico</h3>
+                                    <p class="tour-description">La caminata más emblemática de Sudamérica hasta la puerta del sol de Machu Picchu.</p>
+                                    <button class="btn-more-info">ver más</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1570654628422-93748b0c6a20?w=400&h=250&fit=crop" alt="Cañón del Colca" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$999</span>
-                                                <span class="tour-days">3 días</span>
-                                            </div>
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=250&fit=crop" alt="Amazonía Peruana" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$1,599</span>
+                                            <span class="tour-days">5 días</span>
                                         </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Cañón del Colca</h3>
-                                        <p class="tour-description">Observa el vuelo majestuoso de los cóndores en uno de los cañones más profundos del mundo.</p>
-                                        <button class="btn-more-info">ver más</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=250&fit=crop" alt="Rainbow Mountain" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$89</span>
-                                                <span class="tour-days">Día completo</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Montaña de Colores</h3>
-                                        <p class="tour-description">Descubre la montaña arcoíris más famosa del mundo con sus colores naturales vibrantes.</p>
-                                        <button class="btn-more-info">ver más</button>
-                                    </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Amazonía Peruana</h3>
+                                    <p class="tour-description">Explora la selva amazónica peruana con alojamiento en eco-lodges de lujo.</p>
+                                    <button class="btn-more-info">ver más</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1570654628422-93748b0c4c3?w=400&h=250&fit=crop" alt="Cañón de Colca" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$129</span>
-                                                <span class="tour-days">2 días</span>
-                                            </div>
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1518509565194-3a8d63d0f4c3?w=400&h=250&fit=crop" alt="Lago Titicaca" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$799</span>
+                                            <span class="tour-days">2 días</span>
                                         </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Cañón de Colca</h3>
-                                        <p class="tour-description">Observa el majestuoso vuelo de los cóndores en el segundo cañón más profundo del mundo.</p>
-                                        <button class="btn-more-info">ver más</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=400&h=250&fit=crop" alt="Valle Sagrado Premium" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$299</span>
-                                                <span class="tour-days">2 días</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Valle Sagrado Premium</h3>
-                                        <p class="tour-description">Explora Pisac, Ollantaytambo y las salineras de Maras con almuerzo gourmet incluido.</p>
-                                        <button class="btn-more-info">ver más</button>
-                                    </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Lago Titicaca</h3>
+                                    <p class="tour-description">Navega por el lago navegable más alto del mundo y visita las islas flotantes.</p>
+                                    <button class="btn-more-info">ver más</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1518509565194-3a8d63d0f4c3?w=400&h=250&fit=crop" alt="Lago Titicaca Express" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$199</span>
-                                                <span class="tour-days">2 días</span>
-                                            </div>
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1570654628422-93748b0c6a20?w=400&h=250&fit=crop" alt="Cañón del Colca" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$999</span>
+                                            <span class="tour-days">3 días</span>
                                         </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Lago Titicaca Express</h3>
-                                        <p class="tour-description">Navega por el lago más alto del mundo y visita las islas flotantes de los Uros.</p>
-                                        <button class="btn-more-info">ver más</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1533002535226-22da29157c0f?w=400&h=250&fit=crop" alt="Cusco Nocturno" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$79</span>
-                                                <span class="tour-days">Noche</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Cusco Nocturno</h3>
-                                        <p class="tour-description">Descubre la magia de Cusco iluminado con cena y show de danzas tradicionales.</p>
-                                        <button class="btn-more-info">ver más</button>
-                                    </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Cañón del Colca</h3>
+                                    <p class="tour-description">Observa el vuelo majestuoso de los cóndores en uno de los cañones más profundos del mundo.</p>
+                                    <button class="btn-more-info">ver más</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1544966503-7cc5ac882d5d?w=400&h=250&fit=crop" alt="Selva Amazónica" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$899</span>
-                                                <span class="tour-days">3 días</span>
-                                            </div>
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=250&fit=crop" alt="Rainbow Mountain" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$89</span>
+                                            <span class="tour-days">Día completo</span>
                                         </div>
-                                    </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Selva Amazónica</h3>
-                                        <p class="tour-description">Aventura en la selva peruana con alojamiento en eco-lodge y avistamiento de fauna.</p>
-                                        <button class="btn-more-info">ver más</button>
                                     </div>
                                 </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Montaña de Colores</h3>
+                                    <p class="tour-description">Descubre la montaña arcoíris más famosa del mundo con sus colores naturales vibrantes.</p>
+                                    <button class="btn-more-info">ver más</button>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="carousel-slide">
-                                <div class="tour-card">
-                                    <div class="tour-image-container">
-                                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop" alt="Nazca y Paracas" class="tour-image">
-                                        <div class="tour-overlay">
-                                            <div class="tour-details">
-                                                <span class="tour-price">$299</span>
-                                                <span class="tour-days">2 días</span>
-                                            </div>
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1570654628422-93748b0c4c3?w=400&h=250&fit=crop" alt="Cañón de Colca" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$129</span>
+                                            <span class="tour-days">2 días</span>
                                         </div>
                                     </div>
-                                    <div class="tour-info">
-                                        <h3 class="tour-name">Nazca y Paracas</h3>
-                                        <p class="tour-description">Vuela sobre las líneas de Nazca y visita la reserva de Paracas con sus playas rojas.</p>
-                                        <button class="btn-more-info">ver más</button>
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Cañón de Colca</h3>
+                                    <p class="tour-description">Observa el majestuoso vuelo de los cóndores en el segundo cañón más profundo del mundo.</p>
+                                    <button class="btn-more-info">ver más</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=400&h=250&fit=crop" alt="Valle Sagrado Premium" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$299</span>
+                                            <span class="tour-days">2 días</span>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Valle Sagrado Premium</h3>
+                                    <p class="tour-description">Explora Pisac, Ollantaytambo y las salineras de Maras con almuerzo gourmet incluido.</p>
+                                    <button class="btn-more-info">ver más</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1518509565194-3a8d63d0f4c3?w=400&h=250&fit=crop" alt="Lago Titicaca Express" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$199</span>
+                                            <span class="tour-days">2 días</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Lago Titicaca Express</h3>
+                                    <p class="tour-description">Navega por el lago más alto del mundo y visita las islas flotantes de los Uros.</p>
+                                    <button class="btn-more-info">ver más</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1533002535226-22da29157c0f?w=400&h=250&fit=crop" alt="Cusco Nocturno" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$79</span>
+                                            <span class="tour-days">Noche</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Cusco Nocturno</h3>
+                                    <p class="tour-description">Descubre la magia de Cusco iluminado con cena y show de danzas tradicionales.</p>
+                                    <button class="btn-more-info">ver más</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1544966503-7cc5ac882d5d?w=400&h=250&fit=crop" alt="Selva Amazónica" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$899</span>
+                                            <span class="tour-days">3 días</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Selva Amazónica</h3>
+                                    <p class="tour-description">Aventura en la selva peruana con alojamiento en eco-lodge y avistamiento de fauna.</p>
+                                    <button class="btn-more-info">ver más</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-slide">
+                            <div class="tour-card">
+                                <div class="tour-image-container">
+                                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop" alt="Nazca y Paracas" class="tour-image">
+                                    <div class="tour-overlay">
+                                        <div class="tour-details">
+                                            <span class="tour-price">$299</span>
+                                            <span class="tour-days">2 días</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-name">Nazca y Paracas</h3>
+                                    <p class="tour-description">Vuela sobre las líneas de Nazca y visita la reserva de Paracas con sus playas rojas.</p>
+                                    <button class="btn-more-info">ver más</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="carousel-controls">
-                        <button class="carousel-btn prev" aria-label="Anterior">‹</button>
-                        <button class="carousel-btn next" aria-label="Siguiente">›</button>
-                    </div>
+                </div>
+                <div class="carousel-controls">
+                    <button class="carousel-btn prev" aria-label="Anterior">‹</button>
+                    <button class="carousel-btn next" aria-label="Siguiente">›</button>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
     <footer class="footer">
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3 class="footer-title">Explorando los Andes</h3>
-                <p class="footer-description">
-                    Experiencias auténticas en la cordillera más majestuosa de Sudamérica. 
-                    Diseñamos viajes inolvidables con respeto por la cultura y el medio ambiente.
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">Explorando los Andes</h3>
+                    <p class="footer-description">
+                        Experiencias auténticas en la cordillera más majestuosa de Sudamérica.
+                        Diseñamos viajes inolvidables con respeto por la cultura y el medio ambiente.
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-heading">Contacto</h4>
+                    <ul class="footer-links">
+                        <li><a href="tel:+51987654321">+51 987 654 321</a></li>
+                        <li><a href="mailto:hola@explorandolosandes.com">hola@explorandolosandes.com</a></li>
+                        <li>Calle Saphi 444, Cusco, Perú</li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-heading">Enlaces Rápidos</h4>
+                    <ul class="footer-links">
+                        <li><a href="#itinerary">Itinerario</a></li>
+                        <li><a href="#recommendations">Recomendaciones</a></li>
+                        <li><a href="#includes">Incluye</a></li>
+                        <li><a href="#meeting-points">Puntos de Encuentro</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Términos y Condiciones</a></li>
+                        <li><a href="#">Política de Privacidad</a></li>
+                        <li><a href="#">Seguro de Viaje</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook">Facebook</a>
+                    <a href="#" aria-label="Instagram">Instagram</a>
+                    <a href="#" aria-label="WhatsApp">WhatsApp</a>
+                </div>
+                <p class="copyright">
+                    © 2024 Explorando los Andes. Todos los derechos reservados.
                 </p>
             </div>
-            
-            <div class="footer-section">
-                <h4 class="footer-heading">Contacto</h4>
-                <ul class="footer-links">
-                    <li><a href="tel:+51987654321">+51 987 654 321</a></li>
-                    <li><a href="mailto:hola@explorandolosandes.com">hola@explorandolosandes.com</a></li>
-                    <li>Calle Saphi 444, Cusco, Perú</li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4 class="footer-heading">Enlaces Rápidos</h4>
-                <ul class="footer-links">
-                    <li><a href="#itinerary">Itinerario</a></li>
-                    <li><a href="#recommendations">Recomendaciones</a></li>
-                    <li><a href="#includes">Incluye</a></li>
-                    <li><a href="#meeting-points">Puntos de Encuentro</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4 class="footer-heading">Legal</h4>
-                <ul class="footer-links">
-                    <li><a href="#">Términos y Condiciones</a></li>
-                    <li><a href="#">Política de Privacidad</a></li>
-                    <li><a href="#">Seguro de Viaje</a></li>
-                </ul>
-            </div>
         </div>
-        
-        <div class="footer-bottom">
-            <div class="social-links">
-                <a href="#" aria-label="Facebook">Facebook</a>
-                <a href="#" aria-label="Instagram">Instagram</a>
-                <a href="#" aria-label="WhatsApp">WhatsApp</a>
-            </div>
-            <p class="copyright">
-                © 2024 Explorando los Andes. Todos los derechos reservados.
-            </p>
-        </div>
-    </div>
-</footer>
+    </footer>
 
-<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/tours/assets/js/api.js"></script>
-<script src="/tours/assets/js/detail.js"></script>
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/tours/assets/js/api.js"></script>
+    <script src="/tours/assets/js/detail.js"></script>
 </body>
+
 </html>
