@@ -1515,6 +1515,10 @@ body {
     .main-content {
         flex: 1;
     }
+
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Minimalist Related Tours Section */
@@ -1649,6 +1653,330 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
+}
+
+/* Company Showcase Section */
+.company-showcase-section {
+    padding: 3.5rem 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.company-showcase-card {
+    background: linear-gradient(135deg, #ffffff 0%, var(--surface-alt) 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 12px 32px var(--shadow);
+}
+
+.company-showcase-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+.company-showcase-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.company-showcase-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.company-showcase-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.company-showcase-name {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0.2rem 0;
+    line-height: 1.2;
+}
+
+.company-showcase-legal {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+.company-showcase-desc {
+    font-size: 0.95rem;
+    color: #4a4a4a;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+}
+
+.company-showcase-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.company-feat-tag {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.company-showcase-cta {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    text-align: center;
+    box-shadow: 0 8px 24px var(--shadow);
+}
+
+.company-rating-box {
+    margin-bottom: 1.25rem;
+}
+
+.company-rating-num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.company-rating-stars {
+    color: #f59e0b;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.25rem;
+}
+
+.company-rating-label {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.company-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.btn-company-profile {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.btn-company-profile:hover {
+    background: var(--accent);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(217, 119, 6, 0.25);
+}
+
+.btn-company-contact {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.65rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: var(--transition);
+}
+
+.btn-company-contact:hover {
+    background: #ffffff;
+    border-color: rgba(26,26,26,0.3);
+}
+
+/* Reviews Section Enhancement */
+.reviews-section {
+    padding: 4.5rem 0;
+    background: var(--surface);
+}
+
+.reviews-section-header {
+    margin-bottom: 2.25rem;
+    text-align: center;
+}
+
+.reviews-section-header .section-title {
+    margin-bottom: 0.5rem;
+}
+
+.reviews-section-subtitle {
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem;
+}
+
+.reviews-group {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.75rem;
+}
+
+.reviews-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.reviews-group-header h3 {
+    margin: 0;
+    color: var(--primary);
+    font-size: 1.15rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-card {
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(17, 17, 17, 0.03);
+    transition: all 0.25s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(17, 17, 17, 0.06);
+    border-color: rgba(217, 119, 6, 0.25);
+}
+
+.review-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.review-card-user {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.review-card-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.review-card-username {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--primary);
+}
+
+.review-rating {
+    color: #f59e0b;
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+}
+
+.review-card p {
+    margin: 0.5rem 0;
+    color: #4a4a4a;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.review-card time {
+    color: var(--muted);
+    font-size: 0.75rem;
+    display: block;
+}
+
+.reviews-empty {
+    color: var(--muted);
+    font-size: 0.88rem;
+    padding: 1.5rem;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+}
+
+@media (max-width: 992px) {
+    .company-showcase-grid {
+        grid-template-columns: 1fr;
+    }
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .tour-info {

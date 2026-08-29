@@ -88,22 +88,50 @@ try {
 
     if ($resource === 'tours' && $method === 'GET') {
         $destination = trim((string) ($_GET['destination'] ?? ''));
-        $query = $pdo->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.image_url, t.hero_image_url, t.max_group_size, t.rating, c.id AS company_id, c.trade_name AS company_name, c.rating AS company_rating FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE (? = \'\' OR t.destination LIKE ?) AND t.active = 1 AND c.active = 1 ORDER BY t.rating DESC, t.id DESC');
-        $query->execute([$destination, "%$destination%"]);
+        $category = trim((string) ($_GET['category'] ?? ''));
+        $companyId = filter_var($_GET['company_id'] ?? null, FILTER_VALIDATE_INT);
+
+        $sql = 'SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.image_url, t.hero_image_url, t.max_group_size, t.rating, t.badge, c.id AS company_id, c.trade_name AS company_name, c.rating AS company_rating FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.active = 1 AND c.active = 1';
+        $params = [];
+
+        if ($destination !== '') {
+            $sql .= ' AND (t.destination LIKE ? OR t.name LIKE ?)';
+            $params[] = "%$destination%";
+            $params[] = "%$destination%";
+        }
+
+        if ($category !== '' && strtolower($category) !== 'all' && strtolower($category) !== 'todos') {
+            $sql .= ' AND t.category LIKE ?';
+            $params[] = "%$category%";
+        }
+
+        if ($companyId) {
+            $sql .= ' AND t.company_id = ?';
+            $params[] = $companyId;
+        }
+
+        $sql .= ' ORDER BY t.rating DESC, t.id DESC';
+        $query = $pdo->prepare($sql);
+        $query->execute($params);
         respond(['data' => $query->fetchAll()]);
     }
 
     if ($resource === 'tour' && $method === 'GET') {
-        $tourId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $tourId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT) ?: filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         if (!$tourId) respond(['error' => 'id de tour es obligatorio'], 422);
 
-        $query = $pdo->prepare('SELECT t.*, c.trade_name AS company_name, c.rating AS company_rating, c.email AS company_email, c.phone AS company_phone, c.website AS company_website FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id = ? AND t.active = 1 AND c.active = 1 LIMIT 1');
+        $query = $pdo->prepare('SELECT t.*, c.id AS company_id, c.legal_name AS company_legal_name, c.trade_name AS company_name, c.description AS company_description, c.logo_url AS company_logo_url, c.address AS company_address, c.city AS company_city, c.country AS company_country, c.rating AS company_rating, c.email AS company_email, c.phone AS company_phone, c.website AS company_website FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id = ? AND t.active = 1 AND c.active = 1 LIMIT 1');
         $query->execute([$tourId]);
         $tour = $query->fetch();
         if (!$tour) respond(['error' => 'Tour no encontrado'], 404);
 
         $relatedQuery = $pdo->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.image_url, t.hero_image_url, t.rating, c.id AS company_id, c.trade_name AS company_name, c.rating AS company_rating FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id <> ? AND t.active = 1 AND c.active = 1 ORDER BY (t.company_id = ?) DESC, (t.destination = ?) DESC, t.rating DESC, c.rating DESC, t.id DESC LIMIT 12');
         $relatedQuery->execute([$tourId, $tour['company_id'], $tour['destination']]);
+
+        $tourReviewsQuery = $pdo->prepare('SELECT id, reviewer_name, rating, comment, created_at FROM tour_reviews WHERE tour_id = ? ORDER BY RAND() LIMIT 5');
+        $tourReviewsQuery->execute([$tourId]);
+        $companyReviewsQuery = $pdo->prepare('SELECT id, reviewer_name, rating, comment, created_at FROM company_reviews WHERE company_id = ? ORDER BY RAND() LIMIT 5');
+        $companyReviewsQuery->execute([$tour['company_id']]);
 
         $relatedQueries = [
             'quick_details' => 'SELECT id, label, value, display_order FROM tour_quick_details WHERE tour_id = ? ORDER BY display_order, id',
@@ -132,11 +160,54 @@ try {
         }
         unset($vehicle);
 
-        respond(['data' => ['tour' => $tour, 'related_tours' => $relatedQuery->fetchAll(), ...$sections]]);
+        respond(['data' => ['tour' => $tour, 'related_tours' => $relatedQuery->fetchAll(), 'tour_reviews' => $tourReviewsQuery->fetchAll(), 'company_reviews' => $companyReviewsQuery->fetchAll(), ...$sections]]);
+    }
+
+    if ($resource === 'company' && $method === 'GET') {
+        $companyId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT) ?: filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        if (!$companyId) respond(['error' => 'id de compañía es obligatorio'], 422);
+
+        $query = $pdo->prepare('SELECT id, legal_name, trade_name, tax_id, description, email, phone, website, logo_url, address, city, country, rating, created_at FROM companias WHERE id = ? AND active = 1 LIMIT 1');
+        $query->execute([$companyId]);
+        $company = $query->fetch();
+        if (!$company) respond(['error' => 'Compañía no encontrada'], 404);
+
+        $toursQuery = $pdo->prepare('SELECT id, name, description, destination, price, duration, category, max_group_size, max_altitude_meters, difficulty, hero_image_url, image_url, badge, rating FROM tours WHERE company_id = ? AND active = 1 ORDER BY rating DESC, id DESC');
+        $toursQuery->execute([$companyId]);
+        $tours = $toursQuery->fetchAll();
+
+        $reviewsQuery = $pdo->prepare('SELECT id, reviewer_name, rating, comment, created_at FROM company_reviews WHERE company_id = ? ORDER BY created_at DESC');
+        $reviewsQuery->execute([$companyId]);
+        $reviews = $reviewsQuery->fetchAll();
+
+        $vehiclesQuery = $pdo->prepare('SELECT id, brand, model, license_plate, vehicle_year, color, seat_capacity, accessible_seats, luggage_capacity, status, notes FROM vehicles WHERE company_id = ? AND active = 1 ORDER BY brand, model, id');
+        $vehiclesQuery->execute([$companyId]);
+        $vehicles = $vehiclesQuery->fetchAll();
+
+        foreach ($vehicles as &$vehicle) {
+            $photosQuery = $pdo->prepare('SELECT id, image_url, alt_text, is_cover, display_order FROM vehicle_photos WHERE vehicle_id = ? ORDER BY is_cover DESC, display_order, id');
+            $photosQuery->execute([$vehicle['id']]);
+            $vehicle['photos'] = $photosQuery->fetchAll();
+        }
+        unset($vehicle);
+
+        $destinations = array_values(array_unique(array_filter(array_column($tours, 'destination'))));
+        $categories = array_values(array_unique(array_filter(array_column($tours, 'category'))));
+
+        respond([
+            'data' => [
+                'company' => $company,
+                'tours' => $tours,
+                'reviews' => $reviews,
+                'vehicles' => $vehicles,
+                'destinations' => $destinations,
+                'categories' => $categories
+            ]
+        ]);
     }
 
     if ($resource === 'departures' && $method === 'GET') {
-        $tourId = filter_input(INPUT_GET, 'tour_id', FILTER_VALIDATE_INT);
+        $tourId = filter_var($_GET['tour_id'] ?? null, FILTER_VALIDATE_INT) ?: filter_input(INPUT_GET, 'tour_id', FILTER_VALIDATE_INT);
         if (!$tourId) respond(['error' => 'tour_id es obligatorio'], 422);
         $query = $pdo->prepare('SELECT d.id, d.tour_id, d.departure_date, d.price, d.currency, d.max_group_size, d.capacity, d.vehicle_id, d.capacity - COUNT(CASE WHEN s.status = \'occupied\' THEN 1 END) AS available_seats FROM departures d LEFT JOIN seats s ON s.departure_id = d.id WHERE d.tour_id = ? AND d.departure_date >= CURRENT_DATE GROUP BY d.id, d.tour_id, d.departure_date, d.price, d.currency, d.max_group_size, d.capacity, d.vehicle_id ORDER BY d.departure_date');
         $query->execute([$tourId]);
@@ -144,7 +215,7 @@ try {
     }
 
     if ($resource === 'vehicles' && $method === 'GET') {
-        $companyId = filter_input(INPUT_GET, 'company_id', FILTER_VALIDATE_INT);
+        $companyId = filter_var($_GET['company_id'] ?? null, FILTER_VALIDATE_INT) ?: filter_input(INPUT_GET, 'company_id', FILTER_VALIDATE_INT);
         $sql = 'SELECT id, company_id, brand, model, license_plate, vehicle_year, color, seat_capacity, accessible_seats, luggage_capacity, status, notes FROM vehicles WHERE active = 1';
         $parameters = [];
         if ($companyId) {
@@ -158,7 +229,7 @@ try {
     }
 
     if ($resource === 'seats' && $method === 'GET') {
-        $departureId = filter_input(INPUT_GET, 'departure_id', FILTER_VALIDATE_INT);
+        $departureId = filter_var($_GET['departure_id'] ?? null, FILTER_VALIDATE_INT) ?: filter_input(INPUT_GET, 'departure_id', FILTER_VALIDATE_INT);
         if (!$departureId) respond(['error' => 'departure_id es obligatorio'], 422);
         $departureQuery = $pdo->prepare('SELECT vehicle_id FROM departures WHERE id = ? LIMIT 1');
         $departureQuery->execute([$departureId]);

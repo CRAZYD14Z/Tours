@@ -25,11 +25,18 @@ const ToursApi = (() => {
                 return response;
             });
         },
-        getTours(destination = '') {
-            return request('tours', `&destination=${encodeURIComponent(destination)}`);
+        getTours(destination = '', category = '', companyId = '') {
+            let query = '';
+            if (destination) query += `&destination=${encodeURIComponent(destination)}`;
+            if (category && category !== 'all' && category !== 'todos') query += `&category=${encodeURIComponent(category)}`;
+            if (companyId && companyId !== 'all') query += `&company_id=${encodeURIComponent(companyId)}`;
+            return request('tours', query);
         },
         getTour(tourId) {
             return request('tour', `&id=${encodeURIComponent(tourId)}`);
+        },
+        getCompany(companyId) {
+            return request('company', `&id=${encodeURIComponent(companyId)}`);
         },
         getDepartures(tourId) {
             return request('departures', `&tour_id=${encodeURIComponent(tourId)}`);

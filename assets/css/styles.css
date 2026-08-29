@@ -203,7 +203,7 @@ body {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 600px;
+    max-width: 1100px;
     color: white;
 }
 
@@ -212,18 +212,21 @@ body {
 }
 
 .hero__title {
-    font-size: 2rem;
-    font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 700;
     margin-bottom: 0.75rem;
     letter-spacing: -0.01em;
     color: white;
-    line-height: 1.2;
+    line-height: 1.15;
+    font-family: 'Playfair Display', Georgia, serif;
 }
 
 .hero__subtitle {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.85);
     font-weight: 300;
+    max-width: 650px;
+    margin: 0 auto;
 }
 
 .search {
@@ -259,52 +262,93 @@ body {
 
 .search__container {
     position: relative;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0;
-    padding: 1.5rem;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    background: rgba(26, 26, 26, 0.55);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    text-align: left;
 }
 
 .search__form {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1.6fr 1.2fr 1.3fr 1.3fr auto;
     gap: 1rem;
+    align-items: flex-end;
 }
 
 .search__group {
     display: flex;
     flex-direction: column;
+    gap: 0.35rem;
 }
 
 .search__label {
-    font-size: 0.75rem;
-    font-weight: 400;
-    margin-bottom: 0.25rem;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: rgba(255, 255, 255, 0.85);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 }
 
-.search__input {
-    padding: 0.875rem;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    background: transparent;
-    font-size: 0.875rem;
+.search__input,
+.search__select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    font-size: 0.88rem;
     transition: var(--transition);
-    color: white;
-    border-radius: 0;
+    color: #ffffff;
+    border-radius: 12px;
+    outline: none;
+    height: 46px;
+    box-sizing: border-box;
+}
+
+.search__select option {
+    background: #1a1a1a;
+    color: #ffffff;
 }
 
 .search__input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.6);
 }
 
-.search__input:focus {
+.search__input:focus,
+.search__select:focus {
     outline: none;
-    border-bottom-color: white;
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+.btn-hero-search {
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 0 1.5rem;
+    height: 46px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 20px rgba(217, 119, 6, 0.35);
+    white-space: nowrap;
+}
+
+.btn-hero-search:hover {
+    background: #b45309;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(217, 119, 6, 0.45);
 }
 
 .search__group--dates {
@@ -989,5 +1033,349 @@ body {
     
     .results__title-sub {
         font-size: 1.3rem;
+    }
+}
+
+/* ==========================================================================
+   Global Stats, Operators Directory & Enhanced Reviews Styles
+   ========================================================================== */
+
+/* Global Stats Bar */
+.global-stats-section {
+    padding: 3rem 1.5rem;
+    max-width: 1200px;
+    margin: -3rem auto 3rem;
+    position: relative;
+    z-index: 10;
+}
+
+.global-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.global-stat-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.global-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.09);
+    border-color: rgba(217, 119, 6, 0.3);
+}
+
+.global-stat-card__num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+}
+
+.global-stat-card__label {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Companies Showcase Section */
+.companies-section {
+    padding: 5rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-header-centered {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #d97706;
+    margin-bottom: 0.5rem;
+}
+
+.section-heading-lg {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.75rem;
+}
+
+.section-subtitle-text {
+    font-size: 1rem;
+    color: #666666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.companies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+}
+
+.company-card-home {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.company-card-home:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.1);
+    border-color: rgba(217, 119, 6, 0.3);
+}
+
+.company-card-home__top {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.company-card-home__logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: #1a1a1a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.company-card-home__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.company-card-home__name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.2rem;
+}
+
+.company-card-home__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.company-card-home__desc {
+    font-size: 0.88rem;
+    color: #4a4a4a;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.company-card-home__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+}
+
+.company-card-home__btn {
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.25s ease;
+}
+
+.company-card-home__btn:hover {
+    background: #d97706;
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+/* Global Reviews Section */
+.global-reviews-section {
+    padding: 5rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 28px;
+    margin-bottom: 4rem;
+}
+
+.global-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.75rem;
+    margin-top: 2.5rem;
+}
+
+.global-review-card {
+    background: #faf7f4;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.75rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.global-review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+    border-color: rgba(217, 119, 6, 0.25);
+}
+
+.global-review-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.global-reviewer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.global-reviewer__avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #fef3c7;
+    color: #d97706;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.global-reviewer__name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #1a1a1a;
+}
+
+.global-review-card__stars {
+    color: #f59e0b;
+    font-size: 0.88rem;
+    letter-spacing: 2px;
+}
+
+.global-review-card__text {
+    font-size: 0.9rem;
+    color: #4a4a4a;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-style: italic;
+    flex: 1;
+}
+
+.global-review-card__source {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #666666;
+    width: fit-content;
+}
+
+.tour-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tour-card .tour-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+}
+
+.tour-card .tour-description {
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.tour-card .tour-company-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #d97706;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    margin-bottom: 0.3rem;
+    display: inline-block;
+}
+
+.tour-card .tour-company-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 992px) {
+    .search__form {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .search__form {
+        grid-template-columns: 1fr;
     }
 }

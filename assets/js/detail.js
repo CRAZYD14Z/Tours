@@ -701,15 +701,139 @@ function renderRelatedTours(relatedTours) {
     if (window.relatedTourCarousel) window.relatedTourCarousel.refresh();
 }
 
+function renderReviews(reviews, targetId, defaultType = 'tour') {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    if (reviews && reviews.length > 0) {
+        target.innerHTML = reviews.map(review => {
+            const initial = (review.reviewer_name || 'V').trim().charAt(0).toUpperCase();
+            const ratingNum = Math.min(5, Math.max(1, Number(review.rating || 5)));
+            let dateText = 'Reciente';
+            if (review.created_at) {
+                try {
+                    const parsedDate = new Date(review.created_at.replace(' ', 'T'));
+                    if (!isNaN(parsedDate.getTime())) {
+                        dateText = parsedDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+                    }
+                } catch (e) {}
+            }
+            return `
+                <article class="review-card">
+                    <div class="review-card__header">
+                        <div class="review-card-user">
+                            <div class="review-card-avatar">${escapeDetailHtml(initial)}</div>
+                            <div>
+                                <div class="review-card-username">${escapeDetailHtml(review.reviewer_name || 'Viajero Verificado')}</div>
+                                <time>${escapeDetailHtml(dateText)}</time>
+                            </div>
+                        </div>
+                        <div class="review-rating" aria-label="${ratingNum} de 5">
+                            ${'★'.repeat(ratingNum)}${'☆'.repeat(5 - ratingNum)}
+                        </div>
+                    </div>
+                    <p>"${escapeDetailHtml(review.comment || '')}"</p>
+                </article>
+            `;
+        }).join('');
+    } else {
+        const fallbackReviews = defaultType === 'tour' ? [
+            { name: 'Lucía Herrera', comment: 'La caminata fue exigente, pero las vistas y la guía hicieron que valiera cada paso.', rating: 5, date: 'Hace 1 semana' },
+            { name: 'Mateo Rojas', comment: 'Excelente organización y un paisaje inolvidable. Superó nuestras expectativas.', rating: 5, date: 'Hace 2 semanas' }
+        ] : [
+            { name: 'Camila Paredes', comment: 'La agencia respondió rápido y estuvo pendiente de cada detalle antes y durante el recorrido.', rating: 5, date: 'Hace 3 semanas' },
+            { name: 'Jorge Salazar', comment: 'Personal amable, vehículos muy cómodos y excelente coordinación en todo momento.', rating: 5, date: 'Hace 1 mes' }
+        ];
+
+        target.innerHTML = fallbackReviews.map(review => `
+            <article class="review-card">
+                <div class="review-card__header">
+                    <div class="review-card-user">
+                        <div class="review-card-avatar">${review.name.charAt(0)}</div>
+                        <div>
+                            <div class="review-card-username">${escapeDetailHtml(review.name)}</div>
+                            <time>${review.date}</time>
+                        </div>
+                    </div>
+                    <div class="review-rating">
+                        ${'★'.repeat(review.rating)}
+                    </div>
+                </div>
+                <p>"${escapeDetailHtml(review.comment)}"</p>
+            </article>
+        `).join('');
+    }
+}
+
 function renderTourDetail(payload) {
-    const { tour, related_tours = [], quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures, vehicles } = payload;
+    const { tour, related_tours = [], tour_reviews = [], company_reviews = [], quick_details, highlights, prices, photos, meeting_points, recommendations, inclusions, itinerary, departures, vehicles } = payload;
     document.title = `${tour.name} - Viajero`;
-    document.querySelector('.nav-brand h1').textContent = tour.company_name;
+    
+    const companyId = tour.company_id || 1;
+    const compSlug = (tour.company_name || 'compania')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+    const companyUrl = `/tours/compania-de-tours/${compSlug}/${companyId}`;
+
+    const brandEl = document.querySelector('.nav-brand h1');
+    if (brandEl) brandEl.textContent = tour.company_name;
+
+    const brandLink = document.querySelector('.nav-brand a');
+    if (brandLink) brandLink.href = companyUrl;
+
     document.querySelector('.hero-badge').textContent = tour.badge || tour.category;
     document.querySelector('#heroRating').innerHTML = `
         <span>Tour ${renderRating(tour.rating)}</span>
         <span>Operador ${renderRating(tour.company_rating)}</span>
     `;
+
+    // Render Company Showcase Section
+    const tradeNameEl = document.getElementById('companyTradeName');
+    if (tradeNameEl) tradeNameEl.textContent = tour.company_name || 'Operador Local';
+    
+    const legalNameEl = document.getElementById('companyLegalName');
+    if (legalNameEl) {
+        legalNameEl.textContent = tour.company_legal_name && tour.company_legal_name !== tour.company_name 
+            ? `${tour.company_legal_name} • Razón Social` 
+            : `${tour.company_city || 'Cusco'}, ${tour.company_country || 'Perú'}`;
+    }
+    
+    const companyDescEl = document.getElementById('companyDescription');
+    if (companyDescEl) {
+        companyDescEl.textContent = tour.company_description 
+            || 'Operador turístico certificado especializado en salidas grupales, transporte de primera clase y guías locales expertos.';
+    }
+
+    const companyRatingNumEl = document.getElementById('companyRatingValue');
+    if (companyRatingNumEl) {
+        companyRatingNumEl.textContent = Number(tour.company_rating || 4.8).toFixed(1);
+    }
+    
+    const companyProfileLink = document.getElementById('companyProfileLink');
+    if (companyProfileLink) {
+        companyProfileLink.href = companyUrl;
+        companyProfileLink.innerHTML = `<span>Ver perfil y tours de ${escapeDetailHtml(tour.company_name)}</span> <span>→</span>`;
+    }
+
+    const companyLogoContainer = document.getElementById('companyLogoContainer');
+    if (companyLogoContainer) {
+        if (tour.company_logo_url) {
+            companyLogoContainer.innerHTML = `<img src="${escapeDetailHtml(tour.company_logo_url)}" alt="${escapeDetailHtml(tour.company_name)}">`;
+        } else {
+            companyLogoContainer.innerHTML = `<span>${(tour.company_name || 'O').charAt(0).toUpperCase()}</span>`;
+        }
+    }
+
+    const companyCallLink = document.getElementById('companyCallLink');
+    if (companyCallLink && tour.company_phone) {
+        companyCallLink.href = `tel:${tour.company_phone}`;
+        companyCallLink.innerHTML = `<span>📞 ${escapeDetailHtml(tour.company_phone)}</span>`;
+    }
+
+    renderReviews(tour_reviews, 'tourReviews', 'tour');
+    renderReviews(company_reviews, 'companyReviews', 'company');
     document.querySelector('.hero-title').textContent = tour.name;
     document.querySelector('.hero-subtitle').textContent = `${tour.destination} · ${tour.company_name}`;
     document.querySelector('.hero-background').style.backgroundImage = `url("${tour.hero_image_url || tour.image_url}")`;

@@ -10,16 +10,24 @@ function seoSlug(string $value): string
 }
 
 $seoTour = null;
-$seoTourId = filter_input(INPUT_GET, 'tour_id', FILTER_VALIDATE_INT);
+$seoTourId = filter_var($_GET['tour_id'] ?? null, FILTER_VALIDATE_INT) ?: filter_input(INPUT_GET, 'tour_id', FILTER_VALIDATE_INT);
 if ($seoTourId) {
     try {
-        $seoQuery = database()->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.hero_image_url, t.image_url, t.badge, c.trade_name AS company_name FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id = ? AND t.active = 1 AND c.active = 1 LIMIT 1');
+        $seoQuery = database()->prepare('SELECT t.id, t.name, t.description, t.destination, t.price, t.duration, t.category, t.hero_image_url, t.image_url, t.badge, c.id AS company_id, c.trade_name AS company_name, c.legal_name AS company_legal_name, c.rating AS company_rating, c.description AS company_description, c.logo_url AS company_logo_url, c.city AS company_city, c.country AS company_country, c.phone AS company_phone, c.email AS company_email, c.website AS company_website FROM tours t INNER JOIN companias c ON c.id = t.company_id WHERE t.id = ? AND t.active = 1 AND c.active = 1 LIMIT 1');
         $seoQuery->execute([$seoTourId]);
         $seoTour = $seoQuery->fetch();
     } catch (Throwable $error) {
         $seoTour = null;
     }
 }
+
+$companyName = $seoTour['company_name'] ?? 'Explorando los Andes';
+$companyId = (int) ($seoTour['company_id'] ?? 1);
+$companySlug = seoSlug($companyName);
+$companyUrl = "/tours/compania-de-tours/{$companySlug}/{$companyId}";
+$companyRating = number_format((float) ($seoTour['company_rating'] ?? 4.8), 1);
+$companyDesc = $seoTour['company_description'] ?? 'Operador turístico certificado con amplia trayectoria en salidas grupales, transporte de primera clase y guías locales expertos.';
+
 
 $seoTitle = $seoTour ? $seoTour['name'] . ' | ' . $seoTour['company_name'] . ' | Viajero' : 'Tours y experiencias | Viajero';
 $seoDescription = $seoTour ? $seoTour['description'] : 'Descubre tours y experiencias grupales con operadores especializados.';
@@ -79,22 +87,26 @@ $seoStructuredData = $seoTour ? [
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <h1>Explorando los Andes</h1>
+                <a href="<?= htmlspecialchars($companyUrl, ENT_QUOTES, 'UTF-8') ?>" style="text-decoration: none; color: inherit;" title="Ver perfil de la compañía">
+                    <h1><?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') ?></h1>
+                </a>
             </div>
             <div class="nav-menu">
-                <a href="/tours/" class="nav-link">Home</a>
+                <a href="/tours/" class="nav-link">Inicio</a>
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle">TOURS</a>
                     <div class="dropdown-menu">
                         <a href="#gallery" class="dropdown-link">Galería</a>
                         <a href="#itinerary" class="dropdown-link">Itinerario</a>
                         <a href="#vehicle" class="dropdown-link">Transporte</a>
+                        <a href="#operator" class="dropdown-link">Operador</a>
+                        <a href="#reviews" class="dropdown-link">Reseñas</a>
                     </div>
                 </div>
-                
+                <a href="#operator" class="nav-link">Operador</a>
+                <a href="#reviews" class="nav-link">Reseñas</a>
                 <a href="#recommendations" class="nav-link">FAQ</a>
-                <a href="mailto:hola@explorandolosandes.com" class="nav-link">Contacto</a>
-
+                <a href="<?= htmlspecialchars($companyUrl, ENT_QUOTES, 'UTF-8') ?>" class="nav-link" style="color: var(--accent); font-weight: 600;">Ver Compañía</a>
             </div>
             <div class="nav-toggle">
                 <span></span>
@@ -580,8 +592,91 @@ $seoStructuredData = $seoTour ? [
         </div>
     </section>
 
-    <div class="content-booking-wrapper">
-        <section class="related-tours-section">
+    <section class="company-showcase-section" id="operator">
+        <div class="container">
+            <div class="company-showcase-card">
+                <div class="company-showcase-grid">
+                    <div class="company-showcase-main">
+                        <div class="company-showcase-header">
+                            <div class="company-showcase-logo" id="companyLogoContainer">
+                                <?php if (!empty($seoTour['company_logo_url'])): ?>
+                                    <img src="<?= htmlspecialchars($seoTour['company_logo_url'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') ?>">
+                                <?php else: ?>
+                                    <span id="companyLogoInitial"><?= strtoupper(substr($companyName, 0, 1)) ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div>
+                                <span class="badge--verified">✓ Operador Verificado</span>
+                                <h2 class="company-showcase-name" id="companyTradeName"><?= htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') ?></h2>
+                                <p class="company-showcase-legal" id="companyLegalName">
+                                    <?= !empty($seoTour['company_legal_name']) && $seoTour['company_legal_name'] !== $companyName ? htmlspecialchars($seoTour['company_legal_name'], ENT_QUOTES, 'UTF-8') . ' &bull; Razón Social' : (!empty($seoTour['company_city']) ? htmlspecialchars($seoTour['company_city'] . ', ' . ($seoTour['company_country'] ?? ''), ENT_QUOTES, 'UTF-8') : 'Operador Local') ?>
+                                </p>
+                            </div>
+                        </div>
+                        <p class="company-showcase-desc" id="companyDescription">
+                            <?= htmlspecialchars($companyDesc, ENT_QUOTES, 'UTF-8') ?>
+                        </p>
+                        <div class="company-showcase-features">
+                            <span class="company-feat-tag">🛡️ Protocolos de Seguridad</span>
+                            <span class="company-feat-tag">🚌 Flota de Transporte Propia</span>
+                            <span class="company-feat-tag">🧭 Guías Certificados Bilingües</span>
+                            <span class="company-feat-tag">⭐ Atención Personalizada</span>
+                        </div>
+                    </div>
+                    <div class="company-showcase-cta">
+                        <div class="company-rating-box">
+                            <div class="company-rating-num" id="companyRatingValue"><?= $companyRating ?></div>
+                            <div class="company-rating-stars">★★★★★</div>
+                            <div class="company-rating-label">Calificación del Operador</div>
+                        </div>
+                        <div class="company-action-buttons">
+                            <a href="<?= htmlspecialchars($companyUrl, ENT_QUOTES, 'UTF-8') ?>" id="companyProfileLink" class="btn-company-profile">
+                                <span>Ver perfil y todos los tours</span>
+                                <span>→</span>
+                            </a>
+                            <?php if (!empty($seoTour['company_phone'])): ?>
+                                <a href="tel:<?= htmlspecialchars($seoTour['company_phone'], ENT_QUOTES, 'UTF-8') ?>" id="companyCallLink" class="btn-company-contact">
+                                    <span>📞 <?= htmlspecialchars($seoTour['company_phone'], ENT_QUOTES, 'UTF-8') ?></span>
+                                </a>
+                            <?php else: ?>
+                                <a href="<?= htmlspecialchars($companyUrl, ENT_QUOTES, 'UTF-8') ?>#contact" id="companyCallLink" class="btn-company-contact">
+                                    <span>✉️ Contactar operador</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="reviews-section" id="reviews">
+        <div class="container">
+            <div class="reviews-section-header">
+                <p class="section-eyebrow" style="color: var(--accent); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Experiencias Comprobadas</p>
+                <h2 class="section-title">Reseñas y Opiniones</h2>
+                <p class="reviews-section-subtitle">Conoce los testimonios reales de pasajeros que han vivido esta experiencia.</p>
+            </div>
+            <div class="reviews-grid">
+                <div class="reviews-group">
+                    <div class="reviews-group-header">
+                        <h3>🎒 Reseñas del tour</h3>
+                        <span class="tour-rating" style="color: #f59e0b; font-size: 0.9rem;">★★★★★</span>
+                    </div>
+                    <div id="tourReviews" class="reviews-list"></div>
+                </div>
+                <div class="reviews-group">
+                    <div class="reviews-group-header">
+                        <h3>🏢 Reseñas del operador</h3>
+                        <span class="tour-rating" style="color: #f59e0b; font-size: 0.9rem;">★★★★★</span>
+                    </div>
+                    <div id="companyReviews" class="reviews-list"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="related-tours-section">
             <div class="container">
                 
                 <h2 class="section-title">Más experiencias</h2>
@@ -825,10 +920,8 @@ $seoStructuredData = $seoTour ? [
                 </div>
             </div>
         </section>
-    </div>
-</div>
 
-<footer class="footer">
+    <footer class="footer">
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">

@@ -1,29 +1,36 @@
-# Viajero
+# Weekender
 
-Aplicacion web local para descubrir tours y experiencias grupales, consultar sus salidas y reservar asientos. El proyecto usa PHP sin framework, MySQL, JavaScript vanilla y Bootstrap 5. La carpeta se sirve desde XAMPP en `/tours`.
+> *Live the experience, not just the destination* / *Vive la experiencia, no solo el destino*
+
+Aplicación web local para que agencias de viajes locales y pequeñas organizadoras de tours de fin de semana puedan publicar sus salidas grupales, gestionar sus vehículos y permitir a los viajeros consultar itinerarios y reservar asientos con mapa interactivo.
+
+El proyecto está desarrollado con PHP sin framework (arquitectura ligera), MySQL, JavaScript vanilla y Bootstrap 5. La carpeta se sirve desde XAMPP en `/tours`.
 
 ## Estado actual
 
-- La portada vive en `index.php` y presenta busqueda, tarjetas de tours, filtros y secciones informativas.
-- El detalle vive en `pages/detalle/index.php`; puede recibir `tour_id` para generar metadatos SEO desde la base de datos.
-- La seleccion de asientos vive en `pages/bus/index.php` y usa `assets/js/bus.js` junto con la API.
-- `assets/js/api.js` centraliza las peticiones HTTP y guarda el JWT en `localStorage` como `tours_jwt`.
-- Las imagenes de la interfaz usan URLs externas de Unsplash y las librerias CSS/JS se cargan desde CDN.
-- El contenido visual de algunas pantallas sigue siendo estatico; la API ya dispone de los datos necesarios para conectarlo progresivamente.
+- La portada vive en `index.php` y presenta búsqueda de escapadas de fin de semana, tarjetas de tours, filtros y secciones informativas.
+- El detalle vive en `pages/detalle/index.php`; recibe `tour_id` para generar metadatos SEO dinámicos desde la base de datos.
+- La selección de asientos vive en `pages/bus/index.php` y utiliza `assets/js/bus.js` junto con la API.
+- `assets/js/api.js` centraliza las peticiones HTTP y almacena el JWT en `localStorage` como `tours_jwt`.
+- Las imágenes de la interfaz usan URLs externas de Unsplash y las librerías CSS/JS se cargan desde CDN.
+- El contenido visual de algunas pantallas sigue siendo estático; la API dispone de los datos para conectarlo progresivamente.
 
 ## Estructura
 
 ```text
 config.php                 Carga .env y crea la conexion PDO a MySQL
 index.php                  Portada y buscador de experiencias
+compania.php               Punto de entrada raiz para detalle de compania
 api/index.php              API JSON, JWT y reservas
 database/schema.sql        Esquema completo de la base de datos
 pages/bus/index.php        Vista de seleccion de asientos
 pages/detalle/index.php    Vista y metadatos SEO del detalle de un tour
-assets/css/                Tema y estilos de portada, detalle y bus
+pages/compania/index.php   Vista y metadatos SEO del detalle de una compania
+assets/css/                Tema y estilos de portada, detalle, compania y bus
 assets/js/api.js           Cliente comun de la API
 assets/js/main.js          Interacciones de portada y calendario
 assets/js/detail.js        Interacciones del detalle
+assets/js/company.js       Interacciones y filtros del detalle de compania
 assets/js/bus.js           Carga y seleccion de asientos
 ```
 
@@ -78,6 +85,7 @@ Todas las peticiones usan `api/index.php?resource=...` y devuelven JSON.
 | `POST` | `auth` | No | `{ "email": "...", "password": "..." }` |
 | `GET` | `tours` | No | `destination` opcional |
 | `GET` | `tour` | No | `id` obligatorio; devuelve detalle y relaciones |
+| `GET` | `company` | No | `id` obligatorio; devuelve compania, tours, flota y resenas |
 | `GET` | `departures` | No | `tour_id` obligatorio |
 | `GET` | `vehicles` | No | `company_id` opcional |
 | `GET` | `seats` | JWT | `departure_id` obligatorio |

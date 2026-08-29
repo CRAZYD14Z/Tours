@@ -102,6 +102,28 @@ CREATE TABLE tour_quick_details (
     FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
 );
 
+CREATE TABLE tour_reviews (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tour_id INT UNSIGNED NOT NULL,
+    reviewer_name VARCHAR(120) NOT NULL,
+    rating TINYINT UNSIGNED NOT NULL,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
+    CHECK (rating BETWEEN 1 AND 5)
+);
+
+CREATE TABLE company_reviews (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT UNSIGNED NOT NULL,
+    reviewer_name VARCHAR(120) NOT NULL,
+    rating TINYINT UNSIGNED NOT NULL,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companias(id) ON DELETE CASCADE,
+    CHECK (rating BETWEEN 1 AND 5)
+);
+
 CREATE TABLE tour_highlights (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tour_id INT UNSIGNED NOT NULL,

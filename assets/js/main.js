@@ -264,6 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const categorySelect = document.querySelector('#category');
+    const companySelect = document.querySelector('#company');
+    let currentCategory = 'all';
+
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>'"]/g, character => ({
             '&': '&amp;',
@@ -285,42 +289,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTours(tours) {
         if (!resultsGrid) return;
-        if (tours.length === 0) {
-            resultsGrid.innerHTML = '<p class="results__empty">No encontramos tours para este destino.</p>';
+        if (!tours || tours.length === 0) {
+            resultsGrid.innerHTML = '<p class="results__empty" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">No encontramos tours para los filtros seleccionados.</p>';
             return;
         }
 
-        resultsGrid.innerHTML = tours.map(tour => `
-            <article class="tour-card">
+        resultsGrid.innerHTML = tours.map(tour => {
+            const compSlug = slugify(tour.company_name);
+            const tourSlug = slugify(tour.name);
+            const tourUrl = `${compSlug}/${tourSlug}/${encodeURIComponent(tour.id)}`;
+            const companyProfileUrl = `compania-de-tours/${compSlug}/${encodeURIComponent(tour.company_id)}`;
+            const ratingScore = Number(tour.rating || 4.8).toFixed(1);
+
+            return `
+            <article class="tour-card" data-category="${escapeHtml(tour.category || '')}">
                 <div class="tour-image-container">
-                    <img src="${escapeHtml(tour.image_url || tour.hero_image_url)}" alt="${escapeHtml(tour.name)}" class="tour-image">
+                    <img src="${escapeHtml(tour.image_url || tour.hero_image_url || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=500&h=350&fit=crop')}" alt="${escapeHtml(tour.name)}" class="tour-image" loading="lazy">
                     <div class="tour-overlay">
                         <div class="tour-details">
-                            <span class="tour-price">${escapeHtml(tour.price)} USD</span>
+                            <span class="tour-price">$${Number(tour.price).toFixed(0)} USD</span>
                             <span class="tour-days">${escapeHtml(tour.duration)}</span>
                         </div>
                     </div>
                 </div>
                 <div class="tour-info">
-                    <p class="tour-company">${escapeHtml(tour.company_name)}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <a href="${companyProfileUrl}" class="tour-company-link">🏢 ${escapeHtml(tour.company_name)}</a>
+                        <span style="color: #f59e0b; font-size: 0.82rem; font-weight: 600;">★ ${ratingScore}</span>
+                    </div>
                     <h3 class="tour-name">${escapeHtml(tour.name)}</h3>
                     <p class="tour-description">${escapeHtml(tour.description)}</p>
-                    <a class="btn-more-info" href="${slugify(tour.company_name)}/${slugify(tour.name)}/${encodeURIComponent(tour.id)}">ver más</a>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px solid #f0ece7; padding-top: 0.75rem;">
+                        <span style="font-size: 0.78rem; color: #666;">📍 ${escapeHtml(tour.destination)}</span>
+                        <a class="btn-more-info" href="${tourUrl}">ver más →</a>
+                    </div>
                 </div>
             </article>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    async function loadTours(destination = '') {
+    async function loadTours(destination = '', category = '', companyId = '') {
         if (!resultsGrid) return;
         resultsGrid.style.opacity = '0.5';
         try {
-            const response = await ToursApi.getTours(destination);
+            const response = await ToursApi.getTours(destination, category, companyId);
             resultsGrid.dataset.apiStatus = 'loaded';
             renderTours(response.data);
+            if (locationSpan) {
+                if (destination && category && category !== 'all') {
+                    locationSpan.textContent = `${destination} (${category})`;
+                } else if (destination) {
+                    locationSpan.textContent = destination;
+                } else if (category && category !== 'all') {
+                    locationSpan.textContent = `Categoría: ${category}`;
+                } else if (companyId && companyId !== 'all') {
+                    locationSpan.textContent = 'Filtro por Operador';
+                } else {
+                    locationSpan.textContent = 'Todos los destinos';
+                }
+            }
         } catch (error) {
             resultsGrid.dataset.apiStatus = 'error';
-            resultsGrid.innerHTML = '<p class="results__empty">No se pudieron cargar los tours.</p>';
+            resultsGrid.innerHTML = '<p class="results__empty" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">No se pudieron cargar los tours.</p>';
             console.error(error);
         } finally {
             resultsGrid.style.opacity = '1';
@@ -329,43 +360,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadTours();
 
-    if (searchForm && destinationInput) {
+    if (searchForm) {
         searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const destination = destinationInput.value.trim();
-            if (locationSpan) {
-                locationSpan.textContent = destination || 'Todos los destinos';
+            const destination = destinationInput ? destinationInput.value.trim() : '';
+            const category = categorySelect ? categorySelect.value : currentCategory;
+            const companyId = companySelect ? companySelect.value : '';
+            
+            // Sync filter buttons
+            filterBtns.forEach(btn => {
+                const btnCat = btn.dataset.category || btn.textContent.trim().toLowerCase();
+                btn.classList.toggle('active', btnCat === (category || 'all') || (btnCat === 'todos' && category === 'all'));
+            });
+
+            await loadTours(destination, category, companyId);
+            
+            // Smooth scroll to results
+            const resultsSec = document.querySelector('.results');
+            if (resultsSec) {
+                resultsSec.scrollIntoView({ behavior: 'smooth' });
             }
-            await loadTours(destination);
         });
     }
 
-    // Handle filters
+    // Handle category filter buttons
     filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => {
-                b.classList.remove('active');
-                b.style.transform = 'scale(1)';
-            });
+        btn.addEventListener('click', async () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Ripple effect
-            btn.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                btn.style.transform = 'scale(1)';
-            }, 150);
+            const btnCategory = btn.dataset.category || btn.textContent.trim();
+            currentCategory = (btnCategory.toLowerCase() === 'todos' || btnCategory.toLowerCase() === 'all') ? 'all' : btnCategory;
             
-            // Add animation to cards
-            const cards = document.querySelectorAll('.tour-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.4s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
+            if (categorySelect) {
+                categorySelect.value = currentCategory;
+            }
+
+            const destination = destinationInput ? destinationInput.value.trim() : '';
+            const companyId = companySelect ? companySelect.value : '';
+
+            await loadTours(destination, currentCategory, companyId);
         });
     });
 

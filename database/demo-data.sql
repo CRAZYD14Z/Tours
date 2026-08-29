@@ -53,6 +53,24 @@ SET @booking_id = LAST_INSERT_ID();
 
 DELETE FROM booking_seats WHERE booking_id = @booking_id;
 
+DELETE FROM tour_reviews WHERE tour_id = @tour_id;
+INSERT INTO tour_reviews (tour_id, reviewer_name, rating, comment) VALUES
+    (@tour_id, 'Lucía Herrera', 5, 'La caminata fue exigente, pero las vistas y la guía hicieron que valiera cada paso.'),
+    (@tour_id, 'Mateo Rojas', 5, 'Excelente organización y un paisaje inolvidable en la laguna.'),
+    (@tour_id, 'Sofía Castillo', 4, 'Muy buena experiencia. Recomiendo llevar ropa abrigadora.'),
+    (@tour_id, 'Daniel Torres', 5, 'El grupo fue pequeño y la atención del guía fue excelente.'),
+    (@tour_id, 'Valentina Cruz', 4, 'Todo estuvo bien coordinado y el transporte fue puntual.'),
+    (@tour_id, 'Andrés Molina', 5, 'Una de las mejores excursiones que hicimos en Cusco.');
+
+DELETE FROM company_reviews WHERE company_id = @agency_id;
+INSERT INTO company_reviews (company_id, reviewer_name, rating, comment) VALUES
+    (@agency_id, 'Camila Paredes', 5, 'La agencia respondió rápido y estuvo pendiente de cada detalle.'),
+    (@agency_id, 'Jorge Salazar', 5, 'Personal amable, vehículos cómodos y muy buena coordinación.'),
+    (@agency_id, 'Elena Vargas', 4, 'Servicio confiable y guías con mucho conocimiento local.'),
+    (@agency_id, 'Nicolás Peña', 5, 'La experiencia superó nuestras expectativas de principio a fin.'),
+    (@agency_id, 'Mariana León', 4, 'Muy buena atención antes y durante el viaje.'),
+    (@agency_id, 'Pablo Núñez', 5, 'Organización impecable y comunicación clara.');
+
 INSERT INTO booking_seats (booking_id, seat_id, passenger_type, passenger_number)
 SELECT @booking_id, id, passenger_type, passenger_number
 FROM (
